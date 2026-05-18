@@ -1,19 +1,24 @@
-import { useState, useCallback } from 'react';
-import './App.css';
-import { Navbar } from '@/sections/Navbar';
-import { ServicesCatalog } from '@/sections/ServicesCatalog';
-import { BookingView } from '@/sections/BookingView';
-import { AdminLogin } from '@/sections/AdminLogin';
-import { AdminDashboard } from '@/sections/AdminDashboard';
-import { StudentLogin } from '@/sections/StudentLogin';
-import { StudentDashboard } from '@/sections/StudentDashboard';
-import { useClinicData, resetAllData } from '@/hooks/useClinicData';
-import type { User, ViewName, Booking } from '@/types';
+// src/App.tsx
+import { useState, useCallback } from 'react'
+import './App.css'
+
+// Sections
+import { Navbar } from '@/sections/Navbar'
+import { ServicesCatalog } from '@/sections/ServicesCatalog'
+import { BookingView } from '@/sections/BookingView'
+import { AdminLogin } from '@/sections/AdminLogin'
+import { AdminDashboard } from '@/sections/AdminDashboard'
+import { StudentLogin } from '@/sections/StudentLogin'
+import { StudentDashboard } from '@/sections/StudentDashboard'
+
+// Hooks & Types
+import { useClinicData, resetAllData } from '@/hooks/useClinicData'
+import type { User, ViewName, Booking, ScheduleEntry } from '@/types'
 
 function App() {
-  const [currentView, setCurrentView] = useState<ViewName>('catalog');
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-
+  const [currentView, setCurrentView] = useState<ViewName>('catalog')
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  
   const {
     users,
     services,
@@ -26,76 +31,68 @@ function App() {
     setSchedule,
     refresh,
     SERVICE_CATEGORIES,
-  } = useClinicData();
+  } = useClinicData()
 
+  // Auth handlers
   const handleLogin = useCallback((user: User) => {
-    setCurrentUser(user);
-  }, []);
+    setCurrentUser(user)
+  }, [])
 
   const handleLogout = useCallback(() => {
-    setCurrentUser(null);
-    setCurrentView('catalog');
-  }, []);
+    setCurrentUser(null)
+    setCurrentView('catalog')
+  }, [])
 
+  // Navigation
   const handleSwitchView = useCallback((view: ViewName) => {
-    setCurrentView(view);
-  }, []);
+    setCurrentView(view)
+  }, [])
 
-  const handleAddStudent = useCallback(
-    (student: User) => {
-      addUser(student);
-      refresh();
-    },
-    [addUser, refresh]
-  );
+  // Admin actions
+  const handleAddStudent = useCallback((student: User) => {
+    addUser(student)
+    refresh()
+  }, [addUser, refresh])
 
-  const handleRemoveStudent = useCallback(
-    (uid: string) => {
-      removeUser(uid);
-      refresh();
-    },
-    [removeUser, refresh]
-  );
+  const handleRemoveStudent = useCallback((uid: string) => {
+    removeUser(uid)
+    refresh()
+  }, [removeUser, refresh])
 
-  const handleUpdateUser = useCallback(
-    (user: User) => {
-      updateUser(user);
-      if (currentUser?.uid === user.uid) {
-        setCurrentUser(user);
-      }
-      refresh();
-    },
-    [updateUser, currentUser, refresh]
-  );
+  const handleUpdateUser = useCallback((user: User) => {
+    updateUser(user)
+    if (currentUser?.uid === user.uid) {
+      setCurrentUser(user)
+    }
+    refresh()
+  }, [updateUser, currentUser, refresh])
 
-  const handleUpdateSchedule = useCallback(
-    (newSchedule: import('@/types').ScheduleEntry[]) => {
-      setSchedule(newSchedule);
-      refresh();
-    },
-    [setSchedule, refresh]
-  );
+  const handleUpdateSchedule = useCallback((newSchedule: ScheduleEntry[]) => {
+    setSchedule(newSchedule)
+    refresh()
+  }, [setSchedule, refresh])
 
-  const handleBook = useCallback(
-    (booking: Booking) => {
-      addBooking(booking);
-      refresh();
-    },
-    [addBooking, refresh]
-  );
+  // Booking
+  const handleBook = useCallback((booking: Booking) => {
+    addBooking(booking)
+    refresh()
+  }, [addBooking, refresh])
 
+  // Reset
   const handleResetData = useCallback(() => {
-    resetAllData();
-    setCurrentUser(null);
-    setCurrentView('catalog');
-    refresh();
-    window.location.reload();
-  }, [refresh]);
+    resetAllData()
+    setCurrentUser(null)
+    setCurrentView('catalog')
+    refresh()
+    window.location.reload()
+  }, [refresh])
 
+  // View renderer
   const renderView = () => {
     switch (currentView) {
       case 'catalog':
-        return <ServicesCatalog categories={SERVICE_CATEGORIES} />;
+        return <ServicesCatalog categories={SERVICE_CATEGORIES} />
+      
       case 'booking':
         return (
           <BookingView
@@ -106,7 +103,8 @@ function App() {
             onBook={handleBook}
             categories={SERVICE_CATEGORIES}
           />
-        );
+        )
+      
       case 'admin-login':
         return (
           <AdminLogin
@@ -114,7 +112,8 @@ function App() {
             onLogin={handleLogin}
             onSwitchView={handleSwitchView}
           />
-        );
+        )
+      
       case 'admin-dashboard':
         return currentUser?.role === 'admin' ? (
           <AdminDashboard
@@ -131,7 +130,8 @@ function App() {
             onLogin={handleLogin}
             onSwitchView={handleSwitchView}
           />
-        );
+        )
+      
       case 'student-login':
         return (
           <StudentLogin
@@ -139,7 +139,8 @@ function App() {
             onLogin={handleLogin}
             onSwitchView={handleSwitchView}
           />
-        );
+        )
+      
       case 'student-dashboard':
         return currentUser?.role === 'student' ? (
           <StudentDashboard
@@ -157,11 +158,12 @@ function App() {
             onLogin={handleLogin}
             onSwitchView={handleSwitchView}
           />
-        );
+        )
+      
       default:
-        return <ServicesCatalog categories={SERVICE_CATEGORIES} />;
+        return <ServicesCatalog categories={SERVICE_CATEGORIES} />
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gray-50/80">
@@ -174,7 +176,7 @@ function App() {
         {renderView()}
       </main>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
