@@ -39,6 +39,11 @@ import {
 import { Badge } from '@/components/ui/badge';
 import type { User, Service, Booking } from '@/types';
 
+Lock
+import {
+  Users, Scissors, CalendarCheck, Trash2, Plus, AlertTriangle, Lock // ✅ Add Lock
+} from 'lucide-react';
+
 interface AdminDashboardProps {
   users: User[];
   services: Service[];
