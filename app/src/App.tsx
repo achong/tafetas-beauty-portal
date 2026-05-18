@@ -114,22 +114,25 @@ function App() {
           />
         )
       
-      // Find this section in App.tsx (~line 88)
-case 'admin-dashboard':
-  return currentUser?.role === 'admin' ? (
-    <AdminDashboard
-      currentUser={currentUser}          // ✅ Add this line
-      users={users}
-      services={services}
-      bookings={bookings}
-      onAddStudent={handleAddStudent}
-      onRemoveStudent={handleRemoveStudent}
-      onResetData={handleResetData}
-      onUpdateUser={handleUpdateUser}    // ✅ Add this line
-    />
-  ) : (
-    <AdminLogin users={users} onLogin={handleLogin} onSwitchView={handleSwitchView} />
-  );
+      case 'admin-dashboard':
+        return currentUser?.role === 'admin' ? (
+          <AdminDashboard
+            currentUser={currentUser}
+            users={users}
+            services={services}
+            bookings={bookings}
+            onAddStudent={handleAddStudent}
+            onRemoveStudent={handleRemoveStudent}
+            onResetData={handleResetData}
+            onUpdateUser={handleUpdateUser}
+          />
+        ) : (
+          <AdminLogin
+            users={users}
+            onLogin={handleLogin}
+            onSwitchView={handleSwitchView}
+          />
+        )
       
       case 'student-login':
         return (
