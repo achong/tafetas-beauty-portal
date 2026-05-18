@@ -6,6 +6,7 @@ import {
   Trash2,
   Plus,
   AlertTriangle,
+  Lock, // ✅ Added Lock icon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,31 +40,26 @@ import {
 import { Badge } from '@/components/ui/badge';
 import type { User, Service, Booking } from '@/types';
 
-Lock
-import {
-  Users, Scissors, CalendarCheck, Trash2, Plus, AlertTriangle, Lock // ✅ Add Lock
-} from 'lucide-react';
-
 interface AdminDashboardProps {
-  currentUser: User;        // ✅ Add this
+  currentUser: User;        // ✅ Added
   users: User[];
   services: Service[];
   bookings: Booking[];
   onAddStudent: (student: User) => void;
   onRemoveStudent: (uid: string) => void;
   onResetData: () => void;
-  onUpdateUser: (user: User) => void; // ✅ Add this
+  onUpdateUser: (user: User) => void; // ✅ Added
 }
 
 export function AdminDashboard({
-  currentUser, // ✅ Add this
+  currentUser, // ✅ Added
   users,
   services,
   bookings,
   onAddStudent,
   onRemoveStudent,
   onResetData,
-  onUpdateUser, // ✅ Add this
+  onUpdateUser, // ✅ Added
 }: AdminDashboardProps) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
@@ -75,25 +71,10 @@ export function AdminDashboard({
     password: string;
   } | null>(null);
 
+  // ✅ Password change state
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-const [newPassword, setNewPassword] = useState('');
-const [confirmPassword, setConfirmPassword] = useState('');
-
-const handleChangePassword = () => {
-  if (!newPassword || newPassword.length < 6) {
-    alert('Password must be at least 6 characters');
-    return;
-  }
-  if (newPassword !== confirmPassword) {
-    alert('Passwords do not match');
-    return;
-  }
-  onUpdateUser({ ...currentUser, password: newPassword, isTemp: false });
-  setShowPasswordModal(false);
-  setNewPassword('');
-  setConfirmPassword('');
-  alert('Password updated successfully');
-};
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const students = useMemo(
     () => users.filter((u) => u.role === 'student'),
@@ -123,6 +104,23 @@ const handleChangePassword = () => {
       bg: 'bg-green-50',
     },
   ];
+
+  // ✅ Password change handler
+  const handleChangePassword = () => {
+    if (!newPassword || newPassword.length < 6) {
+      alert('Password must be at least 6 characters');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    onUpdateUser({ ...currentUser, password: newPassword, isTemp: false });
+    setShowPasswordModal(false);
+    setNewPassword('');
+    setConfirmPassword('');
+    alert('Password updated successfully');
+  };
 
   const handleAddStudent = () => {
     const f = firstName.trim();
@@ -156,30 +154,31 @@ const handleChangePassword = () => {
 
   return (
     <div className="fade-in space-y-6">
-     {/* Header */}
-<div className="flex justify-between items-center flex-wrap gap-3">
-  <h2 className="text-2xl font-bold text-gray-900">Admin Dashboard</h2>
-  <div className="flex gap-2">
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={() => setShowPasswordModal(true)}
-      className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-    >
-      <Lock className="w-4 h-4 mr-1.5" />
-      Change Password
-    </Button>
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={() => setShowResetDialog(true)}
-      className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-    >
-      <AlertTriangle className="w-4 h-4 mr-1.5" />
-      Reset System
-    </Button>
-  </div>
-</div>
+      {/* Header */}
+      <div className="flex justify-between items-center flex-wrap gap-3">
+        <h2 className="text-2xl font-bold text-gray-900">Admin Dashboard</h2>
+        <div className="flex gap-2">
+          {/* ✅ Change Password Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowPasswordModal(true)}
+            className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+          >
+            <Lock className="w-4 h-4 mr-1.5" />
+            Change Password
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowResetDialog(true)}
+            className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+          >
+            <AlertTriangle className="w-4 h-4 mr-1.5" />
+            Reset System
+          </Button>
+        </div>
+      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -396,53 +395,68 @@ const handleChangePassword = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    
-    {/* Change Password Modal */}
-<Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
-  <DialogContent className="max-w-md">
-    <DialogHeader>
-      <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
-        <Lock className="w-6 h-6 text-blue-600" />
-      </div>
-      <DialogTitle className="text-lg font-bold text-gray-900 text-center">
-        Change Admin Password
-      </DialogTitle>
-      <DialogDescription className="text-center text-gray-500">
-        Set a secure password for your account.
-      </DialogDescription>
-    </DialogHeader>
-    <div className="space-y-4 pt-2">
-      <div>
-        <Label className="text-sm text-gray-700 mb-1 block">New Password (min 6 characters)</Label>
-        <Input
-          type="password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          placeholder="New Password"
-          onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
-        />
-      </div>
-      <div>
-        <Label className="text-sm text-gray-700 mb-1 block">Confirm Password</Label>
-        <Input
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm Password"
-          onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
-        />
-      </div>
-    </div>
-    <div className="flex gap-3 mt-2">
-      <Button variant="outline" className="flex-1" onClick={() => { setShowPasswordModal(false); setNewPassword(''); setConfirmPassword(''); }}>
-        Cancel
-      </Button>
-      <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white" onClick={handleChangePassword}>
-        Update Password
-      </Button>
-    </div>
-  </DialogContent>
-</Dialog>
+
+      {/* ✅ Change Password Modal */}
+      <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
+              <Lock className="w-6 h-6 text-blue-600" />
+            </div>
+            <DialogTitle className="text-lg font-bold text-gray-900 text-center">
+              Change Admin Password
+            </DialogTitle>
+            <DialogDescription className="text-center text-gray-500">
+              Set a secure password for your account.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div>
+              <Label className="text-sm text-gray-700 mb-1 block">
+                New Password (min 6 characters)
+              </Label>
+              <Input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="New Password"
+                onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
+              />
+            </div>
+            <div>
+              <Label className="text-sm text-gray-700 mb-1 block">
+                Confirm Password
+              </Label>
+              <Input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm Password"
+                onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
+              />
+            </div>
+          </div>
+          <div className="flex gap-3 mt-2">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => {
+                setShowPasswordModal(false);
+                setNewPassword('');
+                setConfirmPassword('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={handleChangePassword}
+            >
+              Update Password
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
