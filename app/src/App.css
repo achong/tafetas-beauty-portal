@@ -1,0 +1,66 @@
+/* Clinic Portal Animations */
+.fade-in {
+  animation: fadeIn 0.35s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Calendar button transitions */
+.calendar-day {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.calendar-day:hover {
+  transform: scale(1.05);
+}
+
+/* Slot button transitions */
+.slot-btn {
+  transition: all 0.15s ease;
+}
+
+.slot-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+/* Focus ring for accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #7c3aed;
+  outline-offset: 2px;
+}
+
+/* shadcn dialog animation fixes */
+[data-radix-dialog-overlay] {
+  backdrop-filter: blur(4px);
+}
