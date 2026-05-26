@@ -14,7 +14,7 @@
     --popover: 0 0% 5.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 16 88% 54%; /* Orange Brand */
+    --primary: 16 88% 54%;
     --primary-foreground: 0 0% 98%;
 
     --secondary: 0 0% 14.9%;
@@ -23,7 +23,7 @@
     --muted: 0 0% 14.9%;
     --muted-foreground: 0 0% 63.9%;
 
-    --accent: 16 88% 54%; /* Orange Brand */
+    --accent: 16 88% 54%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
@@ -31,7 +31,7 @@
 
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
-    --ring: 16 88% 54%; /* Orange Brand */
+    --ring: 16 88% 54%;
     --radius: 0.75rem;
   }
 }
