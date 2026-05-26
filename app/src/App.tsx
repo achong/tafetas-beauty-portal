@@ -166,9 +166,14 @@ function App() {
         return <ServicesCatalog categories={SERVICE_CATEGORIES} />
     }
   }
+// ... imports
+
+function App() {
+  // ... state and logic
 
   return (
-    <div className="min-h-screen bg-gray-50/80">
+    // CHANGED: bg-gray-50/80 -> bg-background
+    <div className="min-h-screen bg-background">
       <Navbar
         currentUser={currentUser}
         onSwitchView={handleSwitchView}
