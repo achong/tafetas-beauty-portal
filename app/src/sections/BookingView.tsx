@@ -20,7 +20,7 @@ import {
 import type { Service, User, Booking } from '@/types';
 import type { ScheduleEntry } from '@/types';
 
-// Define the time slots directly to avoid import issues
+// Defined directly to avoid import path issues
 const CLINIC_TIME_SLOTS = [
   '9:00', '9:30', '10:00', '10:30', '11:00', '11:30',
   '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
@@ -37,8 +37,9 @@ interface BookingViewProps {
 }
 
 export function BookingView({ services, users, schedule, bookings, onBook, categories }: BookingViewProps) {
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedServiceId, setSelectedServiceId] = useState('');
+  // Use "all" instead of "" to comply with Radix UI Select requirements
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedServiceId, setSelectedServiceId] = useState('all');
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
@@ -55,20 +56,19 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
 
   const filteredServices = useMemo(() => {
     if (!services) return [];
-    if (!selectedCategory) return services;
+    if (selectedCategory === 'all') return services;
     return services.filter((s) => s.category === selectedCategory);
   }, [selectedCategory, services]);
 
   const selectedService = useMemo(
-    () => services?.find((s) => s.service_id === selectedServiceId) || null,
+    () => selectedServiceId === 'all' ? null : (services?.find((s) => s.service_id === selectedServiceId) || null),
     [selectedServiceId, services]
   );
 
   const availableStudents = useMemo(() => {
     if (!selectedService || !users) return [];
     return users.filter(
-      (u) =>
-        u.role === 'student' && (u.services_active || []).includes(selectedService.service_id)
+      (u) => u.role === 'student' && (u.services_active || []).includes(selectedService.service_id)
     );
   }, [selectedService, users]);
 
@@ -82,8 +82,7 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
   const availableSlots = useMemo(() => {
     if (!selectedDate || !selectedStudentId || !schedule) return [];
     return schedule.filter(
-      (s) =>
-        s.student_id === selectedStudentId && s.date === selectedDate && s.is_open
+      (s) => s.student_id === selectedStudentId && s.date === selectedDate && s.is_open
     );
   }, [selectedDate, selectedStudentId, schedule]);
 
@@ -110,8 +109,7 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
 
   const handleCategoryChange = (val: string) => {
     setSelectedCategory(val);
-    setSelectedServiceId('');
-    setSelectedStudentId('');
+    setSelectedServiceId('all'); // Reset to "all"
     setSelectedDate('');
     setSelectedTime('');
   };
@@ -151,8 +149,8 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
 
   const handleCloseConfirm = () => {
     setShowConfirm(false);
-    setSelectedCategory('');
-    setSelectedServiceId('');
+    setSelectedCategory('all');
+    setSelectedServiceId('all');
     setSelectedStudentId('');
     setSelectedDate('');
     setSelectedTime('');
@@ -165,7 +163,7 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
   const minDate = new Date().toISOString().split('T')[0];
 
   const steps = [
-    { label: 'Service', done: !!selectedServiceId },
+    { label: 'Service', done: selectedServiceId !== 'all' },
     { label: 'Student', done: !!selectedStudentId },
     { label: 'Date', done: !!selectedDate },
     { label: 'Time', done: !!selectedTime },
@@ -229,7 +227,7 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 {categoryList.map((c) => (
                   <SelectItem key={c} value={c}>
                     {c}
@@ -247,7 +245,7 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
                 <SelectValue placeholder="Select a Service" />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
-                <SelectItem value="">Select a Service</SelectItem>
+                <SelectItem value="all">Select a Service</SelectItem>
                 {filteredServices.map((s) => (
                   <SelectItem key={s.service_id} value={s.service_id}>
                     <div className="flex justify-between items-center w-full gap-4">
