@@ -1,12 +1,13 @@
-/* Clinic Portal Animations */
+/* Clinic Portal - TasTAFE Inspired Theme */
+
 .fade-in {
-  animation: fadeIn 0.35s ease-in;
+  animation: fadeIn 0.5s ease-in;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -14,53 +15,104 @@
   }
 }
 
-/* Smooth scrollbar */
+/* Modern scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f1f1f1;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
+  background: #F26522;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #E55A1A;
 }
 
-/* Calendar button transitions */
-.calendar-day {
-  cursor: pointer;
-  transition: all 0.15s ease;
+/* Card hover effects */
+.card-hover {
+  transition: all 0.3s ease;
 }
 
-.calendar-day:hover {
-  transform: scale(1.05);
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(242, 101, 34, 0.15);
 }
 
-/* Slot button transitions */
-.slot-btn {
-  transition: all 0.15s ease;
+/* Button styles */
+.btn-primary {
+  background: linear-gradient(135deg, #F26522 0%, #E55A1A 100%);
+  transition: all 0.3s ease;
 }
 
-.slot-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(242, 101, 34, 0.4);
+}
+
+/* Section dividers */
+.section-divider {
+  height: 4px;
+  background: linear-gradient(90deg, #F26522 0%, #FF9955 100%);
+  border-radius: 2px;
 }
 
 /* Focus ring for accessibility */
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 2px solid #7c3aed;
+  outline: 3px solid #F26522;
   outline-offset: 2px;
 }
 
-/* shadcn dialog animation fixes */
+/* Dialog animations */
 [data-radix-dialog-overlay] {
   backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Modern card styling */
+.modern-card {
+  background: white;
+  border-radius: 1rem;
+  border: 1px solid #E5E5E5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.modern-card:hover {
+  box-shadow: 0 8px 24px rgba(242, 101, 34, 0.12);
+  border-color: #F26522;
+}
+
+/* Hero section gradient */
+.hero-gradient {
+  background: linear-gradient(135deg, #FFF5F0 0%, #FFE5D9 100%);
+}
+
+/* Text gradients */
+.text-gradient {
+  background: linear-gradient(135deg, #F26522 0%, #E55A1A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Badge styles */
+.badge-primary {
+  background: #FFF5F0;
+  color: #F26522;
+  border: 1px solid #FFCCB3;
+}
+
+/* Input focus styles */
+.input-modern:focus {
+  border-color: #F26522;
+  box-shadow: 0 0 0 3px rgba(242, 101, 34, 0.1);
 }
