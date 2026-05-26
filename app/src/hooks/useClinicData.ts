@@ -95,13 +95,13 @@ export async function initializeData(): Promise<void> {
         password: 'admin123',
         isTemp: false,
       };
-      await setDoc(doc(db, 'users', adminUser.uid), adminUser);
+      await setDoc(doc(db, 'users', adminUser.uid), adminUser as DocumentData);
 
       const defaultServices = generateDefaultServices();
       const batch = writeBatch(db);
       defaultServices.forEach((service) => {
         const serviceRef = doc(collection(db, 'services'));
-        batch.set(serviceRef, service);
+        batch.set(serviceRef, service as DocumentData);
       });
       await batch.commit();
     }
@@ -110,7 +110,6 @@ export async function initializeData(): Promise<void> {
   }
 }
 
-// MOVED: resetAllData must be defined BEFORE useClinicData so it can be returned and exported
 export async function resetAllData(): Promise<void> {
   try {
     const collections = ['users', 'services', 'schedule', 'bookings'];
@@ -118,7 +117,7 @@ export async function resetAllData(): Promise<void> {
       const colRef = collection(db, colName);
       const snapshot = await getDocs(colRef);
       const batch = writeBatch(db);
-      snapshot.forEach((doc) => batch.delete(doc.ref));
+      snapshot.forEach((d) => batch.delete(d.ref));
       await batch.commit();
     }
     await initializeData();
@@ -141,10 +140,13 @@ export function useClinicData() {
     const unsubscribeUsers = onSnapshot(
       collection(db, 'users'),
       (snapshot: QuerySnapshot<DocumentData>) => {
-        const usersData = snapshot.docs.map(doc => ({
-          uid: doc.id,
-          ...doc.data()
-        } as User));
+        const usersData = snapshot.docs.map(docSnap => {
+          const data = docSnap.data();
+          return {
+            uid: docSnap.id,
+            ...data
+          } as User;
+        });
         setUsersState(usersData);
       },
       (err: Error) => {
@@ -153,14 +155,17 @@ export function useClinicData() {
       }
     );
 
-    // ✅ Services (Fixed: was previously setting Users)
+    // ✅ Services
     const unsubscribeServices = onSnapshot(
       collection(db, 'services'),
       (snapshot: QuerySnapshot<DocumentData>) => {
-        const servicesData = snapshot.docs.map(doc => ({
-          service_id: doc.id,
-          ...doc.data()
-        } as Service));
+        const servicesData = snapshot.docs.map(docSnap => {
+          const data = docSnap.data();
+          return {
+            service_id: docSnap.id,
+            ...data
+          } as Service;
+        });
         setServicesState(servicesData);
       },
       (err: Error) => {
@@ -169,15 +174,19 @@ export function useClinicData() {
       }
     );
 
-    // ✅ Schedule (Fixed: was previously setting Users)
+    // ✅ Schedule
     const unsubscribeSchedule = onSnapshot(
       collection(db, 'schedule'),
       (snapshot: QuerySnapshot<DocumentData>) => {
-        const scheduleData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as ScheduleEntry & { id: string }));
-        setScheduleState(scheduleData.map(({ id, ...rest }) => rest));
+        const scheduleData = snapshot.docs.map(docSnap => {
+          const data = docSnap.data();
+          return {
+            id: docSnap.id,
+            ...data
+          } as ScheduleEntry & { id: string };
+        });
+        // Remove the temporary 'id' field for the ScheduleEntry type
+        setScheduleState(scheduleData.map(({ id, ...rest }) => rest as ScheduleEntry));
       },
       (err: Error) => {
         console.error('Error listening to schedule:', err);
@@ -185,14 +194,17 @@ export function useClinicData() {
       }
     );
 
-    // ✅ Bookings (Fixed: was previously setting Users)
+    // ✅ Bookings
     const unsubscribeBookings = onSnapshot(
       collection(db, 'bookings'),
       (snapshot: QuerySnapshot<DocumentData>) => {
-        const bookingsData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as Booking));
+        const bookingsData = snapshot.docs.map(docSnap => {
+          const data = docSnap.data();
+          return {
+            id: docSnap.id,
+            ...data
+          } as Booking;
+        });
         setBookingsState(bookingsData);
       },
       (err: Error) => {
@@ -214,7 +226,7 @@ export function useClinicData() {
 
   const addUser = useCallback(async (user: User) => {
     try {
-      await setDoc(doc(db, 'users', user.uid), user);
+      await setDoc(doc(db, 'users', user.uid), user as DocumentData);
     } catch (err) {
       console.error('Error adding user:', err);
       setError('Failed to add user');
@@ -234,7 +246,7 @@ export function useClinicData() {
 
   const updateUser = useCallback(async (updatedUser: User) => {
     try {
-      await updateDoc(doc(db, 'users', updatedUser.uid), updatedUser);
+      await updateDoc(doc(db, 'users', updatedUser.uid), updatedUser as DocumentData);
     } catch (err) {
       console.error('Error updating user:', err);
       setError('Failed to update user');
@@ -245,7 +257,7 @@ export function useClinicData() {
   const addBooking = useCallback(async (booking: Booking) => {
     try {
       const bookingRef = doc(collection(db, 'bookings'));
-      await setDoc(bookingRef, { ...booking, id: bookingRef.id });
+      await setDoc(bookingRef, { ...booking, id: bookingRef.id } as DocumentData);
     } catch (err) {
       console.error('Error adding booking:', err);
       setError('Failed to add booking');
@@ -258,10 +270,10 @@ export function useClinicData() {
       const batch = writeBatch(db);
       const scheduleRef = collection(db, 'schedule');
       const existingSnapshot = await getDocs(scheduleRef);
-      existingSnapshot.forEach((doc) => batch.delete(doc.ref));
+      existingSnapshot.forEach((d) => batch.delete(d.ref));
       newSchedule.forEach((entry) => {
         const entryRef = doc(scheduleRef);
-        batch.set(entryRef, entry);
+        batch.set(entryRef, entry as DocumentData);
       });
       await batch.commit();
     } catch (err) {
