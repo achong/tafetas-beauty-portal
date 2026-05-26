@@ -13,7 +13,6 @@ const firebaseConfig = {
   measurementId: "G-ZVQ1XXG169"
 };
 
-// Initialize Firebase (singleton pattern)
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 export const db = getFirestore(app);
