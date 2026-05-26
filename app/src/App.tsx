@@ -1,4 +1,7 @@
-import { useState, useCallback } from 'react'
+// src/App.tsx
+import { useState, useCallback, useEffect } from 'react'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
 import './App.css'
 
 // Sections
@@ -12,11 +15,13 @@ import { StudentDashboard } from '@/sections/StudentDashboard'
 
 // Hooks & Types
 import { useClinicData, resetAllData } from '@/hooks/useClinicData'
+import { auth, db } from '@/lib/firebase'
 import type { User, ViewName, Booking, ScheduleEntry } from '@/types'
 
 function App() {
   const [currentView, setCurrentView] = useState<ViewName>('catalog')
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [authLoading, setAuthLoading] = useState(true)
   
   const {
     users,
@@ -32,20 +37,61 @@ function App() {
     SERVICE_CATEGORIES,
   } = useClinicData()
 
+  // Listen for Firebase auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Fetch user document from Firestore
+        try {
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid))
+          if (userDoc.exists()) {
+            setCurrentUser(userDoc.data() as User)
+          } else {
+            // User document doesn't exist - sign out
+            await signOut(auth)
+            setCurrentUser(null)
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error)
+          setCurrentUser(null)
+        }
+      } else {
+        setCurrentUser(null)
+      }
+      setAuthLoading(false)
+    })
+
+    return () => unsubscribe()
+  }, [])
+
   // Auth handlers
   const handleLogin = useCallback((user: User) => {
     setCurrentUser(user)
   }, [])
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
+    try {
+      await signOut(auth)
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
     setCurrentUser(null)
     setCurrentView('catalog')
   }, [])
 
   // Navigation
   const handleSwitchView = useCallback((view: ViewName) => {
+    // Prevent navigation to protected routes if not authenticated
+    if (view === 'admin-dashboard' && currentUser?.role !== 'admin') {
+      setCurrentView('admin-login')
+      return
+    }
+    if (view === 'student-dashboard' && currentUser?.role !== 'student') {
+      setCurrentView('student-login')
+      return
+    }
     setCurrentView(view)
-  }, [])
+  }, [currentUser])
 
   // Admin actions
   const handleAddStudent = useCallback((student: User) => {
@@ -86,6 +132,15 @@ function App() {
     window.location.reload()
   }, [refresh])
 
+  // Show loading state while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground">Loading...</div>
+      </div>
+    )
+  }
+
   // View renderer
   const renderView = () => {
     switch (currentView) {
@@ -105,7 +160,18 @@ function App() {
         )
       
       case 'admin-login':
-        return (
+        return currentUser?.role === 'admin' ? (
+          <AdminDashboard
+            currentUser={currentUser}
+            users={users}
+            services={services}
+            bookings={bookings}
+            onAddStudent={handleAddStudent}
+            onRemoveStudent={handleRemoveStudent}
+            onResetData={handleResetData}
+            onUpdateUser={handleUpdateUser}
+          />
+        ) : (
           <AdminLogin
             users={users}
             onLogin={handleLogin}
@@ -134,7 +200,17 @@ function App() {
         )
       
       case 'student-login':
-        return (
+        return currentUser?.role === 'student' ? (
+          <StudentDashboard
+            currentUser={currentUser}
+            services={services}
+            schedule={schedule}
+            bookings={bookings}
+            categories={SERVICE_CATEGORIES}
+            onUpdateUser={handleUpdateUser}
+            onUpdateSchedule={handleUpdateSchedule}
+          />
+        ) : (
           <StudentLogin
             users={users}
             onLogin={handleLogin}
