@@ -1,4 +1,4 @@
-import { Globe, BookOpen, CalendarDays, ShieldCheck, GraduationCap, LogOut, Menu, X } from 'lucide-react';
+import { BookOpen, CalendarDays, ShieldCheck, GraduationCap, LogOut, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { User, ViewName } from '@/types';
 import { useState } from 'react';
@@ -21,12 +21,13 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
             className="flex items-center cursor-pointer gap-3"
             onClick={() => onSwitchView('catalog')}
           >
-            {/* Replace this with the actual TasTAFE logo image */}
-            <div className="w-10 h-10 bg-[#F26522] rounded flex items-center justify-center">
-              {/* TODO: Replace with actual TasTAFE logo */}
-              <Globe className="w-6 h-6 text-white" />
-            </div>
-            <div>
+            {/* TasTAFE Logo */}
+            <img 
+              src="/assets/image.png" 
+              alt="TasTAFE" 
+              className="h-10 w-auto object-contain"
+            />
+            <div className="hidden sm:block">
               <h1 className="text-lg font-bold text-white">
                 Beauty & Nails Clinic
               </h1>
