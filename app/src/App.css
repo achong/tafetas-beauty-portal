@@ -1,6 +1,7 @@
-/* Clinic Portal Animations */
+/* TasTAFE Clinic Portal Animations & Styles */
+
 .fade-in {
-  animation: fadeIn 0.35s ease-in;
+  animation: fadeIn 0.35s ease-out;
 }
 
 @keyframes fadeIn {
@@ -56,11 +57,21 @@
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 2px solid #7c3aed;
+  outline: 2px solid #E6561C;
   outline-offset: 2px;
 }
 
 /* shadcn dialog animation fixes */
 [data-radix-dialog-overlay] {
   backdrop-filter: blur(4px);
+}
+
+/* Brand-specific styling */
+.text-brand {
+  color: #E6561C;
+}
+
+/* Switch checked state color */
+[data-state="checked"][role="switch"] {
+  background-color: #E6561C;
 }
