@@ -5,6 +5,32 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        brand: {
+          DEFAULT: "#E6561C",
+          50: "#FFF5F2",
+          100: "#FFE4D9",
+          200: "#FFCAB3",
+          300: "#FFA57A",
+          400: "#F2794A",
+          500: "#E6561C",
+          600: "#CC4A16",
+          700: "#B33D0F",
+          800: "#8C300C",
+          900: "#662208",
+        },
+        navy: {
+          DEFAULT: "#1C1C1C",
+          50: "#F5F5F5",
+          100: "#E0E0E0",
+          200: "#C2C2C2",
+          300: "#9E9E9E",
+          400: "#6B6B6B",
+          500: "#4A4A4A",
+          600: "#3A3A3A",
+          700: "#2B2B2B",
+          800: "#1C1C1C",
+          900: "#0D0D0D",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
