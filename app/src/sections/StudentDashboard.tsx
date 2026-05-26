@@ -205,17 +205,17 @@ export function StudentDashboard({
       {/* Welcome Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-[#1A1A1A]">
+          <h2 className="text-2xl font-bold text-foreground">
             Welcome, {currentUser.name}!
           </h2>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="text-muted-foreground text-sm mt-0.5">
             Manage your services and availability
           </p>
         </div>
         {currentUser.isTemp && (
           <Badge
             variant="outline"
-            className="bg-[#FFF5F0] text-[#F26522] border-[#FFCCB3] px-3 py-1.5 cursor-pointer hover:bg-[#FFE5D9] hover:border-[#FF9955] transition-all"
+            className="bg-amber-500/10 text-amber-500 border-amber-500/30 px-3 py-1.5 cursor-pointer hover:bg-amber-500/20"
             onClick={() => setShowPasswordModal(true)}
           >
             <AlertTriangle className="w-3.5 h-3.5 mr-1" />
@@ -226,10 +226,10 @@ export function StudentDashboard({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Service Management */}
-        <Card className="border-gray-200 shadow-sm">
-          <CardHeader className="bg-gradient-to-r from-[#FFF5F0] to-white border-b border-[#FFCCB3]">
-            <CardTitle className="text-lg font-semibold text-[#1A1A1A] flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-[#F26522]" />
+        <Card className="bg-card border-border text-card-foreground">
+          <CardHeader className="border-b border-border bg-card">
+            <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
               Manage Active Services
             </CardTitle>
           </CardHeader>
@@ -237,7 +237,7 @@ export function StudentDashboard({
             <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1">
               {categoryList.map((cat) => (
                 <div key={cat}>
-                  <h4 className="text-sm font-bold text-[#F26522] bg-[#FFF5F0] border border-[#FFCCB3] px-3 py-1.5 rounded-lg mb-2">
+                  <h4 className="text-sm font-bold text-primary bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-lg mb-2">
                     {cat}
                   </h4>
                   <div className="space-y-1">
@@ -252,15 +252,15 @@ export function StudentDashboard({
                             key={s.service_id}
                             className={`flex items-center justify-between p-3 border rounded-xl cursor-pointer transition-all ${
                               isActive
-                                ? 'border-[#F26522] bg-[#FFF5F0] shadow-sm'
-                                : 'border-gray-200 hover:border-[#F26522]/50 hover:bg-gray-50'
+                                ? 'border-primary/50 bg-primary/10 text-foreground'
+                                : 'border-border bg-muted/30 text-muted-foreground hover:bg-muted/50'
                             }`}
                           >
                             <div>
-                              <span className="text-sm text-[#1A1A1A] font-medium">
+                              <span className="text-sm font-medium">
                                 {s.name}
                               </span>
-                              <span className="text-xs text-[#F26522] ml-2 font-semibold">
+                              <span className="text-xs text-primary ml-2 font-semibold">
                                 ${s.price.toFixed(2)}
                               </span>
                             </div>
@@ -269,7 +269,7 @@ export function StudentDashboard({
                               onCheckedChange={(checked) =>
                                 toggleService(s.service_id, checked)
                               }
-                              className="data-[state=checked]:bg-[#F26522]"
+                              className="data-[state=checked]:bg-primary"
                             />
                           </label>
                         );
@@ -282,10 +282,10 @@ export function StudentDashboard({
         </Card>
 
         {/* Calendar & Availability */}
-        <Card className="border-gray-200 shadow-sm">
-          <CardHeader className="bg-gradient-to-r from-[#FFF5F0] to-white border-b border-[#FFCCB3]">
-            <CardTitle className="text-lg font-semibold text-[#1A1A1A] flex items-center gap-2">
-              <Lock className="w-5 h-5 text-[#F26522]" />
+        <Card className="bg-card border-border text-card-foreground">
+          <CardHeader className="border-b border-border bg-card">
+            <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <Lock className="w-5 h-5 text-primary" />
               Set Availability
             </CardTitle>
           </CardHeader>
@@ -296,16 +296,16 @@ export function StudentDashboard({
                 variant="ghost"
                 size="icon"
                 onClick={() => changeMonth(-1)}
-                className="hover:bg-[#FFF5F0] text-[#F26522] hover:text-[#E55A1A]"
+                className="hover:bg-accent text-foreground"
               >
                 <ChevronLeft className="w-5 h-5" />
               </Button>
-              <span className="font-semibold text-[#1A1A1A]">{monthName}</span>
+              <span className="font-semibold text-foreground">{monthName}</span>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => changeMonth(1)}
-                className="hover:bg-[#FFF5F0] text-[#F26522] hover:text-[#E55A1A]"
+                className="hover:bg-accent text-foreground"
               >
                 <ChevronRight className="w-5 h-5" />
               </Button>
@@ -316,7 +316,7 @@ export function StudentDashboard({
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
                 <div
                   key={d}
-                  className="text-center text-xs font-semibold text-gray-500 py-1"
+                  className="text-center text-xs font-semibold text-muted-foreground py-1"
                 >
                   {d}
                 </div>
@@ -342,19 +342,19 @@ export function StudentDashboard({
                     onClick={() => handleDateClick(ds)}
                     className={`relative p-2 border text-center rounded-lg text-sm transition-all hover:scale-105 ${
                       isSelected
-                        ? 'bg-[#F26522] text-white border-[#F26522] shadow-md'
+                        ? 'bg-primary text-primary-foreground border-primary shadow-md'
                         : isToday
-                        ? 'border-[#F26522] bg-[#FFF5F0] text-[#F26522] font-bold'
+                        ? 'border-primary bg-primary/10 text-primary font-bold'
                         : hasOpen
-                        ? 'bg-[#FFF5F0] border-[#FFCCB3] text-[#F26522] font-medium'
-                        : 'bg-white border-gray-200 text-gray-700 hover:bg-[#FFF5F0] hover:border-[#FFCCB3]'
+                        ? 'bg-accent/50 border-primary/30 text-foreground font-medium'
+                        : 'bg-muted/30 border-border text-muted-foreground hover:bg-muted/50'
                     }`}
                   >
                     {day}
                     {bookingCount > 0 && (
                       <span
                         className={`absolute top-0.5 right-0.5 w-2 h-2 rounded-full ${
-                          isSelected ? 'bg-white' : 'bg-[#F26522]'
+                          isSelected ? 'bg-primary-foreground' : 'bg-primary'
                         }`}
                       />
                     )}
@@ -364,34 +364,34 @@ export function StudentDashboard({
             </div>
 
             {/* Legend */}
-            <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+            <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded bg-[#FFF5F0] border border-[#FFCCB3]" />
+                <div className="w-3 h-3 rounded bg-accent/50 border border-primary/30" />
                 <span>Available</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded bg-[#FFF5F0] border border-[#F26522]" />
+                <div className="w-3 h-3 rounded bg-primary/10 border border-primary" />
                 <span>Today</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-[#F26522]" />
+                <div className="w-2 h-2 rounded-full bg-primary" />
                 <span>Has Booking</span>
               </div>
             </div>
 
             {/* Slot Management */}
             {selectedDate && (
-              <div className="mt-6 border-t border-gray-200 pt-4 animate-in fade-in slide-in-from-bottom-2">
+              <div className="mt-6 border-t border-border pt-4 animate-in fade-in slide-in-from-bottom-2">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="font-semibold text-[#1A1A1A]">
+                  <p className="font-semibold text-foreground">
                     Slots for{' '}
-                    <span className="text-[#F26522]">{selectedDate}</span>
+                    <span className="text-primary">{selectedDate}</span>
                   </p>
                   <div className="flex gap-1">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs h-7 border-[#FFCCB3] text-[#F26522] hover:bg-[#FFF5F0] hover:border-[#FF9955]"
+                      className="text-xs h-7 border-green-500/30 text-green-500 hover:bg-green-500/10"
                       onClick={() => toggleAllSlots('open')}
                     >
                       <Check className="w-3 h-3 mr-1" />
@@ -400,7 +400,7 @@ export function StudentDashboard({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs h-7 border-gray-300 text-gray-600 hover:bg-gray-50"
+                      className="text-xs h-7 border-red-500/30 text-red-500 hover:bg-red-500/10"
                       onClick={() => toggleAllSlots('closed')}
                     >
                       <X className="w-3 h-3 mr-1" />
@@ -415,12 +415,12 @@ export function StudentDashboard({
                       key={time}
                       onClick={() => !isBooked && toggleSlot(time)}
                       disabled={isBooked}
-                      className={`p-2.5 border rounded-lg text-xs font-semibold transition-all ${
+                      className={`p-2 border rounded-lg text-xs font-semibold transition-all ${
                         isBooked
-                          ? 'bg-amber-50 border-amber-200 text-amber-700 cursor-not-allowed opacity-70'
+                          ? 'bg-amber-500/10 border-amber-500/30 text-amber-500 cursor-not-allowed opacity-70'
                           : isOpen
-                          ? 'bg-[#F26522] text-white border-[#F26522] hover:bg-[#E55A1A] shadow-sm'
-                          : 'bg-white border-gray-200 text-gray-600 hover:bg-[#FFF5F0] hover:border-[#FFCCB3]'
+                          ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90 shadow-sm'
+                          : 'bg-muted/30 border-border text-muted-foreground hover:bg-muted/50'
                       }`}
                     >
                       {time}
@@ -445,21 +445,21 @@ export function StudentDashboard({
 
       {/* Change Password Modal */}
       <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
-        <DialogContent className="max-w-md border-0 shadow-2xl">
+        <DialogContent className="sm:max-w-md bg-card border-border text-foreground">
           <DialogHeader>
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#F26522] to-[#E55A1A] flex items-center justify-center mx-auto mb-2">
-              <Lock className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-2">
+              <Lock className="w-6 h-6 text-primary" />
             </div>
-            <DialogTitle className="text-lg font-bold text-[#1A1A1A] text-center">
+            <DialogTitle className="text-lg font-bold text-foreground text-center">
               Change Password
             </DialogTitle>
-            <DialogDescription className="text-center text-gray-600">
+            <DialogDescription className="text-center text-muted-foreground">
               Set a secure password for your account.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <Label className="text-sm text-gray-700 mb-1 block font-medium">
+              <Label className="text-sm text-foreground mb-1 block">
                 New Password (min 6 characters)
               </Label>
               <Input
@@ -467,12 +467,12 @@ export function StudentDashboard({
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="New Password"
+                className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                 onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
-                className="border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors"
               />
             </div>
             <div>
-              <Label className="text-sm text-gray-700 mb-1 block font-medium">
+              <Label className="text-sm text-foreground mb-1 block">
                 Confirm Password
               </Label>
               <Input
@@ -480,15 +480,15 @@ export function StudentDashboard({
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm Password"
+                className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                 onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
-                className="border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors"
               />
             </div>
           </div>
           <div className="flex gap-3 mt-4">
             <Button
               variant="outline"
-              className="flex-1 border-gray-300 hover:bg-gray-50"
+              className="flex-1 border-border text-foreground hover:bg-accent"
               onClick={() => {
                 setShowPasswordModal(false);
                 setNewPassword('');
@@ -498,7 +498,7 @@ export function StudentDashboard({
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-gradient-to-r from-[#F26522] to-[#E55A1A] hover:from-[#E55A1A] hover:to-[#CC4D14] text-white shadow-sm hover:shadow-md transition-all"
+              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={handleChangePassword}
             >
               Update Password
