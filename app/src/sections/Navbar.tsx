@@ -1,5 +1,4 @@
 import { BookOpen, CalendarDays, ShieldCheck, GraduationCap, LogOut, Menu, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import type { User, ViewName } from '@/types';
 import { useState } from 'react';
 
