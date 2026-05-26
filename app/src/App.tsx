@@ -1,4 +1,3 @@
-// src/App.tsx
 import { useState, useCallback } from 'react'
 import './App.css'
 
@@ -166,13 +165,8 @@ function App() {
         return <ServicesCatalog categories={SERVICE_CATEGORIES} />
     }
   }
-// ... imports
-
-function App() {
-  // ... state and logic
 
   return (
-    // CHANGED: bg-gray-50/80 -> bg-background
     <div className="min-h-screen bg-background">
       <Navbar
         currentUser={currentUser}
