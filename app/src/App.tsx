@@ -175,10 +175,7 @@ function App() {
             onUpdateUser={handleUpdateUser}
           />
         ) : (
-          <AdminLogin
-            onLogin={handleLogin}
-            onSwitchView={handleSwitchView}
-          />
+     <AdminLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
         )
       
       case 'admin-dashboard':
