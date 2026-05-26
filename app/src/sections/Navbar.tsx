@@ -13,7 +13,7 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-     <nav className="bg-background/90 backdrop-blur-md shadow-md border-b border-border sticky top-0 z-50">
+    <nav className="bg-background/90 backdrop-blur-md shadow-md border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           {/* Logo and Brand */}
@@ -25,10 +25,10 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
               <Globe className="w-7 h-7 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-[#1A1A1A] tracking-tight">
+              <h1 className="text-xl font-bold text-foreground tracking-tight">
                 Beauty & Nails Clinic
               </h1>
-              <p className="text-xs text-gray-500">Student Training Portal</p>
+              <p className="text-xs text-muted-foreground">Student Training Portal</p>
             </div>
           </div>
 
@@ -38,7 +38,7 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
               variant="ghost"
               size="sm"
               onClick={() => onSwitchView('catalog')}
-              className="text-gray-700 hover:text-[#F26522] hover:bg-orange-50 font-medium"
+              className="text-muted-foreground hover:text-[#F26522] hover:bg-accent font-medium"
             >
               <BookOpen className="w-4 h-4 mr-2" />
               Services
@@ -48,7 +48,7 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
               variant="ghost"
               size="sm"
               onClick={() => onSwitchView('booking')}
-              className="text-[#F26522] bg-orange-50 hover:bg-orange-100 hover:text-[#E55A1A] font-semibold"
+              className="text-[#F26522] bg-accent hover:bg-accent/80 font-semibold"
             >
               <CalendarDays className="w-4 h-4 mr-2" />
               Book Now
@@ -60,7 +60,7 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
                   variant="ghost"
                   size="sm"
                   onClick={() => onSwitchView('admin-login')}
-                  className="text-gray-700 hover:text-[#F26522] hover:bg-orange-50"
+                  className="text-muted-foreground hover:text-[#F26522] hover:bg-accent"
                 >
                   <ShieldCheck className="w-4 h-4 mr-2" />
                   Admin
@@ -70,7 +70,7 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
                   variant="ghost"
                   size="sm"
                   onClick={() => onSwitchView('student-login')}
-                  className="text-gray-700 hover:text-[#F26522] hover:bg-orange-50"
+                  className="text-muted-foreground hover:text-[#F26522] hover:bg-accent"
                 >
                   <GraduationCap className="w-4 h-4 mr-2" />
                   Student
@@ -79,12 +79,12 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
             )}
 
             {currentUser && (
-              <div className="flex items-center gap-2 ml-4 pl-4 border-l border-gray-200">
+              <div className="flex items-center gap-2 ml-4 pl-4 border-l border-border">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => onSwitchView(`${currentUser.role}-dashboard` as ViewName)}
-                  className="text-[#F26522] hover:text-[#E55A1A] hover:bg-orange-50 font-semibold"
+                  className="text-[#F26522] hover:text-[#E55A1A] hover:bg-accent font-semibold"
                 >
                   {currentUser.name}
                 </Button>
@@ -92,7 +92,7 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
                   variant="ghost"
                   size="sm"
                   onClick={onLogout}
-                  className="text-gray-600 hover:text-red-600 hover:bg-red-50"
+                  className="text-muted-foreground hover:text-red-500 hover:bg-accent"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout
@@ -107,7 +107,7 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
               variant="ghost"
               size="sm"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-700"
+              className="text-foreground"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </Button>
@@ -116,7 +116,7 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200">
+          <div className="md:hidden py-4 border-t border-border">
             <div className="flex flex-col gap-2">
               <Button
                 variant="ghost"
@@ -124,7 +124,7 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
                   onSwitchView('catalog');
                   setMobileMenuOpen(false);
                 }}
-                className="justify-start text-gray-700 hover:text-[#F26522] hover:bg-orange-50"
+                className="justify-start text-muted-foreground hover:text-[#F26522] hover:bg-accent"
               >
                 <BookOpen className="w-4 h-4 mr-2" />
                 Services
@@ -135,7 +135,7 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
                   onSwitchView('booking');
                   setMobileMenuOpen(false);
                 }}
-                className="justify-start text-[#F26522] bg-orange-50 hover:bg-orange-100"
+                className="justify-start text-[#F26522] bg-accent hover:bg-accent/80"
               >
                 <CalendarDays className="w-4 h-4 mr-2" />
                 Book Now
@@ -148,7 +148,7 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
                       onSwitchView('admin-login');
                       setMobileMenuOpen(false);
                     }}
-                    className="justify-start text-gray-700 hover:text-[#F26522] hover:bg-orange-50"
+                    className="justify-start text-muted-foreground hover:text-[#F26522] hover:bg-accent"
                   >
                     <ShieldCheck className="w-4 h-4 mr-2" />
                     Admin
@@ -159,7 +159,7 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
                       onSwitchView('student-login');
                       setMobileMenuOpen(false);
                     }}
-                    className="justify-start text-gray-700 hover:text-[#F26522] hover:bg-orange-50"
+                    className="justify-start text-muted-foreground hover:text-[#F26522] hover:bg-accent"
                   >
                     <GraduationCap className="w-4 h-4 mr-2" />
                     Student
@@ -174,7 +174,7 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
                       onSwitchView(`${currentUser.role}-dashboard` as ViewName);
                       setMobileMenuOpen(false);
                     }}
-                    className="justify-start text-[#F26522] hover:bg-orange-50"
+                    className="justify-start text-[#F26522] hover:bg-accent"
                   >
                     Dashboard ({currentUser.name})
                   </Button>
@@ -184,7 +184,7 @@ export function Navbar({ currentUser, onSwitchView, onLogout }: NavbarProps) {
                       onLogout();
                       setMobileMenuOpen(false);
                     }}
-                    className="justify-start text-red-600 hover:bg-red-50"
+                    className="justify-start text-red-500 hover:bg-accent"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Logout
