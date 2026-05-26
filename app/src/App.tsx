@@ -115,23 +115,25 @@ function App() {
             onSwitchView={handleSwitchView}
           />
         );
-      case 'admin-dashboard':
-        return currentUser?.role === 'admin' ? (
-          <AdminDashboard
-            users={users}
-            services={services}
-            bookings={bookings}
-            onAddStudent={handleAddStudent}
-            onRemoveStudent={handleRemoveStudent}
-            onResetData={handleResetData}
-          />
-        ) : (
-          <AdminLogin
-            users={users}
-            onLogin={handleLogin}
-            onSwitchView={handleSwitchView}
-          />
-        );
+case 'admin-dashboard':
+  return currentUser?.role === 'admin' ? (
+    <AdminDashboard
+      currentUser={currentUser}
+      users={users}
+      services={services}
+      bookings={bookings}
+      onAddStudent={handleAddStudent}
+      onRemoveStudent={handleRemoveStudent}
+      onResetData={handleResetData}
+      onUpdateUser={handleUpdateUser}
+    />
+  ) : (
+    <AdminLogin
+      users={users}
+      onLogin={handleLogin}
+      onSwitchView={handleSwitchView}
+    />
+  );
       case 'student-login':
         return (
           <StudentLogin
