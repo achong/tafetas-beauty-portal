@@ -145,7 +145,7 @@ export function useClinicData() {
           return {
             uid: docSnap.id,
             ...data
-          } as User;
+          } as unknown as User; // 🔧 Double cast to satisfy TypeScript
         });
         setUsersState(usersData);
       },
@@ -164,7 +164,7 @@ export function useClinicData() {
           return {
             service_id: docSnap.id,
             ...data
-          } as Service;
+          } as unknown as Service; // 🔧 Double cast
         });
         setServicesState(servicesData);
       },
@@ -183,9 +183,8 @@ export function useClinicData() {
           return {
             id: docSnap.id,
             ...data
-          } as ScheduleEntry & { id: string };
+          } as unknown as ScheduleEntry & { id: string }; // 🔧 Double cast
         });
-        // Remove the temporary 'id' field for the ScheduleEntry type
         setScheduleState(scheduleData.map(({ id, ...rest }) => rest as ScheduleEntry));
       },
       (err: Error) => {
@@ -194,7 +193,7 @@ export function useClinicData() {
       }
     );
 
-    // ✅ Bookings
+    // ✅ Bookings (Fixed: double cast resolves the error)
     const unsubscribeBookings = onSnapshot(
       collection(db, 'bookings'),
       (snapshot: QuerySnapshot<DocumentData>) => {
@@ -203,7 +202,7 @@ export function useClinicData() {
           return {
             id: docSnap.id,
             ...data
-          } as Booking;
+          } as unknown as Booking; // 🔧 Double cast: DocumentData -> unknown -> Booking
         });
         setBookingsState(bookingsData);
       },
