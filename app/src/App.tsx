@@ -1,8 +1,11 @@
 // src/App.tsx
 import { useState, useCallback, useEffect } from 'react'
-import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 import './App.css'
+
+// Firebase
+import { auth, db } from '@/lib/firebase'
 
 // Sections
 import { Navbar } from '@/sections/Navbar'
@@ -15,7 +18,6 @@ import { StudentDashboard } from '@/sections/StudentDashboard'
 
 // Hooks & Types
 import { useClinicData, resetAllData } from '@/hooks/useClinicData'
-import { auth, db } from '@/lib/firebase'
 import type { User, ViewName, Booking, ScheduleEntry } from '@/types'
 
 function App() {
@@ -39,7 +41,7 @@ function App() {
 
   // Listen for Firebase auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
         // Fetch user document from Firestore
         try {
@@ -160,6 +162,7 @@ function App() {
         )
       
       case 'admin-login':
+        // If already logged in as admin, show dashboard directly
         return currentUser?.role === 'admin' ? (
           <AdminDashboard
             currentUser={currentUser}
@@ -173,7 +176,6 @@ function App() {
           />
         ) : (
           <AdminLogin
-            users={users}
             onLogin={handleLogin}
             onSwitchView={handleSwitchView}
           />
@@ -193,13 +195,13 @@ function App() {
           />
         ) : (
           <AdminLogin
-            users={users}
             onLogin={handleLogin}
             onSwitchView={handleSwitchView}
           />
         )
       
       case 'student-login':
+        // If already logged in as student, show dashboard directly
         return currentUser?.role === 'student' ? (
           <StudentDashboard
             currentUser={currentUser}
@@ -212,7 +214,6 @@ function App() {
           />
         ) : (
           <StudentLogin
-            users={users}
             onLogin={handleLogin}
             onSwitchView={handleSwitchView}
           />
@@ -231,7 +232,6 @@ function App() {
           />
         ) : (
           <StudentLogin
-            users={users}
             onLogin={handleLogin}
             onSwitchView={handleSwitchView}
           />
