@@ -45,3 +45,30 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 }
+
+
+/* Force dark theme globally */
+* {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Specific overrides for common elements */
+.bg-white {
+  background-color: hsl(var(--card)) !important;
+}
+
+.bg-gray-50 {
+  background-color: hsl(var(--muted)) !important;
+}
+
+.text-gray-900,
+.text-gray-800,
+.text-gray-700 {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Cards and containers */
+.border-gray-200 {
+  border-color: hsl(var(--border)) !important;
+}
