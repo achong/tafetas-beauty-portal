@@ -40,7 +40,7 @@ export function ServicesCatalog({ categories }: ServicesCatalogProps) {
           >
             <div className="bg-[#F26522] px-6 py-4">
               <div className="flex items-center gap-3 text-white">
-                <div className="p-2 bg-white/20 rounded-lg">
+                <div className="p-2 bg-card/20 rounded-lg">
                   {categoryIcons[category] || <Sparkle className="w-5 h-5" />}
                 </div>
                 <h3 className="font-bold text-lg">{category}</h3>
