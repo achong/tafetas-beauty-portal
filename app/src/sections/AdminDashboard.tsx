@@ -6,7 +6,8 @@ import {
   Trash2,
   Plus,
   AlertTriangle,
-  Lock, // ✅ Added Lock icon
+  Lock,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,25 +42,25 @@ import { Badge } from '@/components/ui/badge';
 import type { User, Service, Booking } from '@/types';
 
 interface AdminDashboardProps {
-  currentUser: User;        // ✅ Added
+  currentUser: User;
   users: User[];
   services: Service[];
   bookings: Booking[];
   onAddStudent: (student: User) => void;
   onRemoveStudent: (uid: string) => void;
   onResetData: () => void;
-  onUpdateUser: (user: User) => void; // ✅ Added
+  onUpdateUser: (user: User) => void;
 }
 
 export function AdminDashboard({
-  currentUser, // ✅ Added
+  currentUser,
   users,
   services,
   bookings,
   onAddStudent,
   onRemoveStudent,
   onResetData,
-  onUpdateUser, // ✅ Added
+  onUpdateUser,
 }: AdminDashboardProps) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
@@ -71,7 +72,7 @@ export function AdminDashboard({
     password: string;
   } | null>(null);
 
-  // ✅ Password change state
+  // Password change state
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -86,26 +87,29 @@ export function AdminDashboard({
       label: 'Total Students',
       value: students.length,
       icon: Users,
-      color: 'text-purple-600',
-      bg: 'bg-purple-50',
+      color: 'text-[#F26522]',
+      bg: 'bg-[#FFF5F0]',
+      border: 'border-[#FFCCB3]',
     },
     {
       label: 'Total Services',
       value: services.length,
       icon: Scissors,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
+      color: 'text-[#F26522]',
+      bg: 'bg-[#FFF5F0]',
+      border: 'border-[#FFCCB3]',
     },
     {
       label: 'Total Bookings',
       value: bookings.length,
       icon: CalendarCheck,
-      color: 'text-green-600',
-      bg: 'bg-green-50',
+      color: 'text-[#F26522]',
+      bg: 'bg-[#FFF5F0]',
+      border: 'border-[#FFCCB3]',
     },
   ];
 
-  // ✅ Password change handler
+  // Password change handler
   const handleChangePassword = () => {
     if (!newPassword || newPassword.length < 6) {
       alert('Password must be at least 6 characters');
@@ -156,14 +160,17 @@ export function AdminDashboard({
     <div className="fade-in space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center flex-wrap gap-3">
-        <h2 className="text-2xl font-bold text-gray-900">Admin Dashboard</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-[#1A1A1A]">Admin Dashboard</h2>
+          <p className="text-gray-500 text-sm mt-1">Manage students and system settings</p>
+        </div>
         <div className="flex gap-2">
-          {/* ✅ Change Password Button */}
+          {/* Change Password Button */}
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowPasswordModal(true)}
-            className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+            className="text-[#F26522] border-[#FFCCB3] hover:bg-[#FFF5F0] hover:text-[#E55A1A] hover:border-[#FF9955] transition-all"
           >
             <Lock className="w-4 h-4 mr-1.5" />
             Change Password
@@ -172,7 +179,7 @@ export function AdminDashboard({
             variant="outline"
             size="sm"
             onClick={() => setShowResetDialog(true)}
-            className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+            className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all"
           >
             <AlertTriangle className="w-4 h-4 mr-1.5" />
             Reset System
@@ -183,12 +190,12 @@ export function AdminDashboard({
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map((stat) => (
-          <Card key={stat.label} className="border-gray-200">
+          <Card key={stat.label} className={`border ${stat.border} ${stat.bg} shadow-sm hover:shadow-md transition-shadow`}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+              <CardTitle className="text-sm font-medium text-gray-700">
                 {stat.label}
               </CardTitle>
-              <div className={`w-10 h-10 rounded-lg ${stat.bg} flex items-center justify-center`}>
+              <div className={`w-10 h-10 rounded-lg ${stat.bg} border ${stat.border} flex items-center justify-center`}>
                 <stat.icon className={`w-5 h-5 ${stat.color}`} />
               </div>
             </CardHeader>
@@ -200,15 +207,16 @@ export function AdminDashboard({
       </div>
 
       {/* Student Management */}
-      <Card className="border-gray-200">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg font-semibold text-gray-900">
+      <Card className="border-gray-200 shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-[#FFF5F0] to-white">
+          <CardTitle className="text-lg font-semibold text-[#1A1A1A] flex items-center gap-2">
+            <Users className="w-5 h-5 text-[#F26522]" />
             Student Management
           </CardTitle>
           <Button
             size="sm"
             onClick={() => setShowAddModal(true)}
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+            className="bg-gradient-to-r from-[#F26522] to-[#E55A1A] hover:from-[#E55A1A] hover:to-[#CC4D14] text-white shadow-sm hover:shadow-md transition-all"
           >
             <Plus className="w-4 h-4 mr-1.5" />
             Add Student
@@ -218,27 +226,27 @@ export function AdminDashboard({
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Username</TableHead>
-                  <TableHead>Active Services</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                <TableRow className="border-b-[#FFCCB3]">
+                  <TableHead className="text-[#1A1A1A] font-semibold">Name</TableHead>
+                  <TableHead className="text-[#1A1A1A] font-semibold">Username</TableHead>
+                  <TableHead className="text-[#1A1A1A] font-semibold">Active Services</TableHead>
+                  <TableHead className="text-right text-[#1A1A1A] font-semibold">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {students.length > 0 ? (
                   students.map((s) => (
-                    <TableRow key={s.uid}>
-                      <TableCell className="font-medium text-gray-900">
+                    <TableRow key={s.uid} className="hover:bg-[#FFF5F0] transition-colors">
+                      <TableCell className="font-medium text-[#1A1A1A]">
                         {s.name}
                       </TableCell>
-                      <TableCell className="font-mono text-xs text-gray-500">
+                      <TableCell className="font-mono text-xs text-gray-500 bg-gray-50 rounded px-2 py-1">
                         {s.username}
                       </TableCell>
                       <TableCell>
                         <Badge
                           variant="secondary"
-                          className="bg-purple-100 text-purple-700 hover:bg-purple-100"
+                          className="bg-[#FFF5F0] text-[#F26522] border border-[#FFCCB3] hover:bg-[#FFE5D9]"
                         >
                           {(s.services_active || []).length} active
                         </Badge>
@@ -248,7 +256,7 @@ export function AdminDashboard({
                           variant="ghost"
                           size="sm"
                           onClick={() => handleRemove(s.uid)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 hover:scale-105 transition-all"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -259,9 +267,10 @@ export function AdminDashboard({
                   <TableRow>
                     <TableCell
                       colSpan={4}
-                      className="text-center py-8 text-gray-400"
+                      className="text-center py-8 text-gray-400 bg-[#FFF5F0] rounded-lg"
                     >
-                      No students found.
+                      <Sparkles className="w-8 h-8 mx-auto mb-2 text-[#F26522]/50" />
+                      No students found. Add your first student to get started.
                     </TableCell>
                   </TableRow>
                 )}
@@ -273,47 +282,52 @@ export function AdminDashboard({
 
       {/* Add Student Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md border-0 shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-gray-900">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#F26522] to-[#E55A1A] flex items-center justify-center mx-auto mb-2">
+              <Plus className="w-6 h-6 text-white" />
+            </div>
+            <DialogTitle className="text-lg font-bold text-[#1A1A1A] text-center">
               Add New Student
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-center text-gray-600">
               Create a new student account with auto-generated credentials.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <Label className="text-sm text-gray-700 mb-1 block">First Name</Label>
+              <Label className="text-sm text-gray-700 mb-1 block font-medium">First Name</Label>
               <Input
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="First Name"
                 onKeyDown={(e) => e.key === 'Enter' && handleAddStudent()}
+                className="border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors"
               />
             </div>
             <div>
-              <Label className="text-sm text-gray-700 mb-1 block">Last Name</Label>
+              <Label className="text-sm text-gray-700 mb-1 block font-medium">Last Name</Label>
               <Input
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Last Name"
                 onKeyDown={(e) => e.key === 'Enter' && handleAddStudent()}
+                className="border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors"
               />
             </div>
           </div>
-          <div className="flex gap-3 mt-2">
+          <div className="flex gap-3 mt-4">
             <Button
               variant="outline"
-              className="flex-1"
+              className="flex-1 border-gray-300 hover:bg-gray-50"
               onClick={() => setShowAddModal(false)}
             >
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+              className="flex-1 bg-gradient-to-r from-[#F26522] to-[#E55A1A] hover:from-[#E55A1A] hover:to-[#CC4D14] text-white shadow-sm hover:shadow-md transition-all"
               onClick={handleAddStudent}
             >
               Create Account
@@ -327,12 +341,12 @@ export function AdminDashboard({
         open={showCredentialsModal}
         onOpenChange={setShowCredentialsModal}
       >
-        <DialogContent className="max-w-md text-center">
+        <DialogContent className="max-w-md text-center border-0 shadow-2xl">
           <DialogHeader>
-            <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
-              <Users className="w-7 h-7 text-green-600" />
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#F26522] to-[#E55A1A] flex items-center justify-center mx-auto mb-3 shadow-lg">
+              <Users className="w-8 h-8 text-white" />
             </div>
-            <DialogTitle className="text-lg font-bold text-gray-900">
+            <DialogTitle className="text-lg font-bold text-[#1A1A1A]">
               Student Account Created!
             </DialogTitle>
             <DialogDescription className="text-gray-600">
@@ -340,28 +354,31 @@ export function AdminDashboard({
             </DialogDescription>
           </DialogHeader>
           {generatedCreds && (
-            <div className="bg-gray-50 rounded-xl p-4 space-y-3 text-left my-4">
-              <div>
+            <div className="bg-gradient-to-br from-[#FFF5F0] to-[#FFE5D9] rounded-xl p-4 space-y-3 text-left my-4 border border-[#FFCCB3]">
+              <div className="pb-3 border-b border-[#FFCCB3]/50">
                 <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">
                   Username
                 </p>
-                <p className="text-lg font-mono font-bold text-gray-900">
+                <p className="text-lg font-mono font-bold text-[#1A1A1A] bg-white px-3 py-2 rounded-lg border border-[#FFCCB3]">
                   {generatedCreds.username}
                 </p>
               </div>
-              <div className="border-t pt-3">
+              <div>
                 <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">
                   Temporary Password
                 </p>
-                <p className="text-lg font-mono font-bold text-red-600">
+                <p className="text-lg font-mono font-bold text-[#F26522] bg-white px-3 py-2 rounded-lg border border-[#FFCCB3]">
                   {generatedCreds.password}
                 </p>
               </div>
             </div>
           )}
+          <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+            ⚠️ Student should change password on first login
+          </p>
           <Button
             onClick={() => setShowCredentialsModal(false)}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+            className="w-full bg-gradient-to-r from-[#F26522] to-[#E55A1A] hover:from-[#E55A1A] hover:to-[#CC4D14] text-white font-semibold"
           >
             Done
           </Button>
@@ -370,25 +387,25 @@ export function AdminDashboard({
 
       {/* Reset Confirmation */}
       <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="border-0 shadow-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
+            <AlertDialogTitle className="flex items-center gap-2 text-[#1A1A1A]">
               <AlertTriangle className="w-5 h-5 text-red-600" />
               Reset System
             </AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="text-gray-600">
               This will permanently clear all data including students, bookings,
               and schedules. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="border-gray-300 hover:bg-gray-50">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 onResetData();
                 setShowResetDialog(false);
               }}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white"
             >
               Reset Everything
             </AlertDialogAction>
@@ -396,23 +413,23 @@ export function AdminDashboard({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* ✅ Change Password Modal */}
+      {/* Change Password Modal */}
       <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md border-0 shadow-2xl">
           <DialogHeader>
-            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
-              <Lock className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#F26522] to-[#E55A1A] flex items-center justify-center mx-auto mb-2">
+              <Lock className="w-6 h-6 text-white" />
             </div>
-            <DialogTitle className="text-lg font-bold text-gray-900 text-center">
+            <DialogTitle className="text-lg font-bold text-[#1A1A1A] text-center">
               Change Admin Password
             </DialogTitle>
-            <DialogDescription className="text-center text-gray-500">
+            <DialogDescription className="text-center text-gray-600">
               Set a secure password for your account.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <Label className="text-sm text-gray-700 mb-1 block">
+              <Label className="text-sm text-gray-700 mb-1 block font-medium">
                 New Password (min 6 characters)
               </Label>
               <Input
@@ -421,10 +438,11 @@ export function AdminDashboard({
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="New Password"
                 onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
+                className="border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors"
               />
             </div>
             <div>
-              <Label className="text-sm text-gray-700 mb-1 block">
+              <Label className="text-sm text-gray-700 mb-1 block font-medium">
                 Confirm Password
               </Label>
               <Input
@@ -433,13 +451,14 @@ export function AdminDashboard({
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm Password"
                 onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
+                className="border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors"
               />
             </div>
           </div>
-          <div className="flex gap-3 mt-2">
+          <div className="flex gap-3 mt-4">
             <Button
               variant="outline"
-              className="flex-1"
+              className="flex-1 border-gray-300 hover:bg-gray-50"
               onClick={() => {
                 setShowPasswordModal(false);
                 setNewPassword('');
@@ -449,7 +468,7 @@ export function AdminDashboard({
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+              className="flex-1 bg-gradient-to-r from-[#F26522] to-[#E55A1A] hover:from-[#E55A1A] hover:to-[#CC4D14] text-white shadow-sm hover:shadow-md transition-all"
               onClick={handleChangePassword}
             >
               Update Password
