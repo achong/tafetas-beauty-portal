@@ -8,7 +8,7 @@ import { AdminDashboard } from '@/sections/AdminDashboard';
 import { StudentLogin } from '@/sections/StudentLogin';
 import { StudentDashboard } from '@/sections/StudentDashboard';
 import { useClinicData, resetAllData } from '@/hooks/useClinicData';
-import type { User, ViewName, Booking } from '@/types';
+import type { User, ViewName, Booking, ScheduleEntry } from '@/types';
 
 function App() {
   const [currentView, setCurrentView] = useState<ViewName>('catalog');
@@ -69,7 +69,7 @@ function App() {
   );
 
   const handleUpdateSchedule = useCallback(
-    (newSchedule: import('@/types').ScheduleEntry[]) => {
+    (newSchedule: ScheduleEntry[]) => {
       setSchedule(newSchedule);
       refresh();
     },
@@ -115,25 +115,25 @@ function App() {
             onSwitchView={handleSwitchView}
           />
         );
-case 'admin-dashboard':
-  return currentUser?.role === 'admin' ? (
-    <AdminDashboard
-      currentUser={currentUser}
-      users={users}
-      services={services}
-      bookings={bookings}
-      onAddStudent={handleAddStudent}
-      onRemoveStudent={handleRemoveStudent}
-      onResetData={handleResetData}
-      onUpdateUser={handleUpdateUser}
-    />
-  ) : (
-    <AdminLogin
-      users={users}
-      onLogin={handleLogin}
-      onSwitchView={handleSwitchView}
-    />
-  );
+      case 'admin-dashboard':
+        return currentUser?.role === 'admin' ? (
+          <AdminDashboard
+            currentUser={currentUser}
+            users={users}
+            services={services}
+            bookings={bookings}
+            onAddStudent={handleAddStudent}
+            onRemoveStudent={handleRemoveStudent}
+            onResetData={handleResetData}
+            onUpdateUser={handleUpdateUser}
+          />
+        ) : (
+          <AdminLogin
+            users={users}
+            onLogin={handleLogin}
+            onSwitchView={handleSwitchView}
+          />
+        );
       case 'student-login':
         return (
           <StudentLogin
@@ -166,16 +166,16 @@ case 'admin-dashboard':
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50/80">
       <Navbar
         currentUser={currentUser}
         onSwitchView={handleSwitchView}
         onLogout={handleLogout}
       />
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {renderView()}
       </main>
-      <Footer />
+      {/* Footer component removed because it was missing and causing errors */}
     </div>
   );
 }
