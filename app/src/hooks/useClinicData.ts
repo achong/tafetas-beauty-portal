@@ -6,16 +6,14 @@ import {
   setDoc, 
   updateDoc, 
   deleteDoc,
-  query,
-  where,
   onSnapshot,
   writeBatch,
+  QuerySnapshot,
   DocumentData
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { User, Service, ScheduleEntry, Booking } from '@/types';
 
-// Default service categories (same as before)
 export const SERVICE_CATEGORIES: Record<string, { name: string; price: number }[]> = {
   'Nail Services': [
     { name: 'Manicure', price: 10 },
@@ -66,7 +64,6 @@ export const CLINIC_TIME_SLOTS = [
   '15:00', '15:30', '16:00', '16:30', '17:00',
 ];
 
-// Helper to generate default services for initial setup
 function generateDefaultServices(): Service[] {
   const services: Service[] = [];
   let counter = 1;
@@ -84,25 +81,22 @@ function generateDefaultServices(): Service[] {
   return services;
 }
 
-// Initialize default data if collections are empty
 export async function initializeData(): Promise<void> {
   try {
     const servicesRef = collection(db, 'services');
     const servicesSnapshot = await getDocs(servicesRef);
     
     if (servicesSnapshot.empty) {
-      // Create default admin user
       const adminUser: User = {
         uid: 'admin1',
         role: 'admin',
         name: 'Administrator',
         username: 'admin',
-        password: 'admin123', // In production, use Firebase Auth
+        password: 'admin123',
         isTemp: false,
       };
       await setDoc(doc(db, 'users', adminUser.uid), adminUser);
 
-      // Create default services
       const defaultServices = generateDefaultServices();
       const batch = writeBatch(db);
       defaultServices.forEach((service) => {
@@ -110,11 +104,26 @@ export async function initializeData(): Promise<void> {
         batch.set(serviceRef, service);
       });
       await batch.commit();
-
-      console.log('Default data initialized');
     }
   } catch (error) {
     console.error('Error initializing data:', error);
+  }
+}
+
+export async function resetAllData(): Promise<void> {
+  try {
+    const collections = ['users', 'services', 'schedule', 'bookings'];
+    for (const colName of collections) {
+      const colRef = collection(db, colName);
+      const snapshot = await getDocs(colRef);
+      const batch = writeBatch(db);
+      snapshot.forEach((doc) => batch.delete(doc.ref));
+      await batch.commit();
+    }
+    await initializeData();
+  } catch (err) {
+    console.error('Error resetting data:', err);
+    throw err;
   }
 }
 
@@ -126,18 +135,17 @@ export function useClinicData() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Set up real-time listeners for all collections
   useEffect(() => {
     const unsubscribeUsers = onSnapshot(
       collection(db, 'users'),
-      (snapshot) => {
+      (snapshot: QuerySnapshot<DocumentData>) => {
         const usersData = snapshot.docs.map(doc => ({
           uid: doc.id,
           ...doc.data()
         } as User));
         setUsersState(usersData);
       },
-      (err) => {
+      (err: Error) => {
         console.error('Error listening to users:', err);
         setError('Failed to load users');
       }
@@ -145,14 +153,14 @@ export function useClinicData() {
 
     const unsubscribeServices = onSnapshot(
       collection(db, 'services'),
-      (snapshot) => {
+      (snapshot: QuerySnapshot<DocumentData>) => {
         const servicesData = snapshot.docs.map(doc => ({
           service_id: doc.id,
           ...doc.data()
         } as Service));
         setServicesState(servicesData);
       },
-      (err) => {
+      (err: Error) => {
         console.error('Error listening to services:', err);
         setError('Failed to load services');
       }
@@ -160,15 +168,14 @@ export function useClinicData() {
 
     const unsubscribeSchedule = onSnapshot(
       collection(db, 'schedule'),
-      (snapshot) => {
+      (snapshot: QuerySnapshot<DocumentData>) => {
         const scheduleData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         } as ScheduleEntry & { id: string }));
-        // Convert to ScheduleEntry format (without id field)
         setScheduleState(scheduleData.map(({ id, ...rest }) => rest));
       },
-      (err) => {
+      (err: Error) => {
         console.error('Error listening to schedule:', err);
         setError('Failed to load schedule');
       }
@@ -176,24 +183,22 @@ export function useClinicData() {
 
     const unsubscribeBookings = onSnapshot(
       collection(db, 'bookings'),
-      (snapshot) => {
+      (snapshot: QuerySnapshot<DocumentData>) => {
         const bookingsData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         } as Booking));
         setBookingsState(bookingsData);
       },
-      (err) => {
+      (err: Error) => {
         console.error('Error listening to bookings:', err);
         setError('Failed to load bookings');
       }
     );
 
-    // Initialize default data on first load
     initializeData();
     setLoading(false);
 
-    // Cleanup listeners on unmount
     return () => {
       unsubscribeUsers();
       unsubscribeServices();
@@ -202,7 +207,6 @@ export function useClinicData() {
     };
   }, []);
 
-  // User operations
   const addUser = useCallback(async (user: User) => {
     try {
       await setDoc(doc(db, 'users', user.uid), user);
@@ -233,7 +237,6 @@ export function useClinicData() {
     }
   }, []);
 
-  // Booking operations
   const addBooking = useCallback(async (booking: Booking) => {
     try {
       const bookingRef = doc(collection(db, 'bookings'));
@@ -245,50 +248,20 @@ export function useClinicData() {
     }
   }, []);
 
-  // Schedule operations
   const setSchedule = useCallback(async (newSchedule: ScheduleEntry[]) => {
     try {
-      // For simplicity, we'll replace the entire schedule collection
-      // In production, you might want to use batched writes with individual updates
       const batch = writeBatch(db);
       const scheduleRef = collection(db, 'schedule');
-      
-      // Delete existing schedule entries (optional - depends on your use case)
       const existingSnapshot = await getDocs(scheduleRef);
-      existingSnapshot.forEach((doc) => {
-        batch.delete(doc.ref);
-      });
-      
-      // Add new entries
+      existingSnapshot.forEach((doc) => batch.delete(doc.ref));
       newSchedule.forEach((entry) => {
         const entryRef = doc(scheduleRef);
         batch.set(entryRef, entry);
       });
-      
       await batch.commit();
     } catch (err) {
       console.error('Error updating schedule:', err);
       setError('Failed to update schedule');
-      throw err;
-    }
-  }, []);
-
-  // Reset all data (admin function)
-  const resetAllData = useCallback(async () => {
-    try {
-      const collections = ['users', 'services', 'schedule', 'bookings'];
-      for (const colName of collections) {
-        const colRef = collection(db, colName);
-        const snapshot = await getDocs(colRef);
-        const batch = writeBatch(db);
-        snapshot.forEach((doc) => batch.delete(doc.ref));
-        await batch.commit();
-      }
-      // Re-initialize default data
-      await initializeData();
-    } catch (err) {
-      console.error('Error resetting data:', err);
-      setError('Failed to reset data');
       throw err;
     }
   }, []);
