@@ -7,7 +7,6 @@ import {
   Plus,
   AlertTriangle,
   Lock,
-  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -72,7 +71,6 @@ export function AdminDashboard({
     password: string;
   } | null>(null);
 
-  // Password change state
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -87,29 +85,19 @@ export function AdminDashboard({
       label: 'Total Students',
       value: students.length,
       icon: Users,
-      color: 'text-[#F26522]',
-      bg: 'bg-[#FFF5F0]',
-      border: 'border-[#FFCCB3]',
     },
     {
       label: 'Total Services',
       value: services.length,
       icon: Scissors,
-      color: 'text-[#F26522]',
-      bg: 'bg-[#FFF5F0]',
-      border: 'border-[#FFCCB3]',
     },
     {
       label: 'Total Bookings',
       value: bookings.length,
       icon: CalendarCheck,
-      color: 'text-[#F26522]',
-      bg: 'bg-[#FFF5F0]',
-      border: 'border-[#FFCCB3]',
     },
   ];
 
-  // Password change handler
   const handleChangePassword = () => {
     if (!newPassword || newPassword.length < 6) {
       alert('Password must be at least 6 characters');
@@ -161,16 +149,15 @@ export function AdminDashboard({
       {/* Header */}
       <div className="flex justify-between items-center flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-[#1A1A1A]">Admin Dashboard</h2>
-          <p className="text-gray-500 text-sm mt-1">Manage students and system settings</p>
+          <h2 className="text-2xl font-bold text-foreground">Admin Dashboard</h2>
+          <p className="text-muted-foreground text-sm mt-1">Manage students and system settings</p>
         </div>
         <div className="flex gap-2">
-          {/* Change Password Button */}
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowPasswordModal(true)}
-            className="text-[#F26522] border-[#FFCCB3] hover:bg-[#FFF5F0] hover:text-[#E55A1A] hover:border-[#FF9955] transition-all"
+            className="border-border text-foreground hover:bg-accent hover:text-accent-foreground"
           >
             <Lock className="w-4 h-4 mr-1.5" />
             Change Password
@@ -179,7 +166,7 @@ export function AdminDashboard({
             variant="outline"
             size="sm"
             onClick={() => setShowResetDialog(true)}
-            className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all"
+            className="border-red-900/50 text-red-500 hover:bg-red-950/50 hover:text-red-400"
           >
             <AlertTriangle className="w-4 h-4 mr-1.5" />
             Reset System
@@ -190,33 +177,33 @@ export function AdminDashboard({
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map((stat) => (
-          <Card key={stat.label} className={`border ${stat.border} ${stat.bg} shadow-sm hover:shadow-md transition-shadow`}>
+          <Card key={stat.label} className="bg-card border-border">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-700">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 {stat.label}
               </CardTitle>
-              <div className={`w-10 h-10 rounded-lg ${stat.bg} border ${stat.border} flex items-center justify-center`}>
-                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+              <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
+                <stat.icon className="w-5 h-5 text-primary" />
               </div>
             </CardHeader>
             <CardContent>
-              <p className={`text-3xl font-bold ${stat.color}`}>{stat.value}</p>
+              <p className="text-3xl font-bold text-foreground">{stat.value}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
       {/* Student Management */}
-      <Card className="border-gray-200 shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-[#FFF5F0] to-white">
-          <CardTitle className="text-lg font-semibold text-[#1A1A1A] flex items-center gap-2">
-            <Users className="w-5 h-5 text-[#F26522]" />
+      <Card className="bg-card border-border">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border bg-card">
+          <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary" />
             Student Management
           </CardTitle>
           <Button
             size="sm"
             onClick={() => setShowAddModal(true)}
-            className="bg-gradient-to-r from-[#F26522] to-[#E55A1A] hover:from-[#E55A1A] hover:to-[#CC4D14] text-white shadow-sm hover:shadow-md transition-all"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             <Plus className="w-4 h-4 mr-1.5" />
             Add Student
@@ -226,27 +213,27 @@ export function AdminDashboard({
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-b-[#FFCCB3]">
-                  <TableHead className="text-[#1A1A1A] font-semibold">Name</TableHead>
-                  <TableHead className="text-[#1A1A1A] font-semibold">Username</TableHead>
-                  <TableHead className="text-[#1A1A1A] font-semibold">Active Services</TableHead>
-                  <TableHead className="text-right text-[#1A1A1A] font-semibold">Actions</TableHead>
+                <TableRow className="border-border hover:bg-transparent">
+                  <TableHead className="text-muted-foreground font-medium">Name</TableHead>
+                  <TableHead className="text-muted-foreground font-medium">Username</TableHead>
+                  <TableHead className="text-muted-foreground font-medium">Active Services</TableHead>
+                  <TableHead className="text-right text-muted-foreground font-medium">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {students.length > 0 ? (
                   students.map((s) => (
-                    <TableRow key={s.uid} className="hover:bg-[#FFF5F0] transition-colors">
-                      <TableCell className="font-medium text-[#1A1A1A]">
+                    <TableRow key={s.uid} className="border-border hover:bg-accent/50">
+                      <TableCell className="font-medium text-foreground">
                         {s.name}
                       </TableCell>
-                      <TableCell className="font-mono text-xs text-gray-500 bg-gray-50 rounded px-2 py-1">
+                      <TableCell className="font-mono text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1">
                         {s.username}
                       </TableCell>
                       <TableCell>
                         <Badge
                           variant="secondary"
-                          className="bg-[#FFF5F0] text-[#F26522] border border-[#FFCCB3] hover:bg-[#FFE5D9]"
+                          className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
                         >
                           {(s.services_active || []).length} active
                         </Badge>
@@ -256,7 +243,7 @@ export function AdminDashboard({
                           variant="ghost"
                           size="sm"
                           onClick={() => handleRemove(s.uid)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 hover:scale-105 transition-all"
+                          className="text-red-500 hover:text-red-400 hover:bg-red-950/50"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -267,9 +254,9 @@ export function AdminDashboard({
                   <TableRow>
                     <TableCell
                       colSpan={4}
-                      className="text-center py-8 text-gray-400 bg-[#FFF5F0] rounded-lg"
+                      className="text-center py-8 text-muted-foreground bg-muted/20 rounded-lg"
                     >
-                      <Sparkles className="w-8 h-8 mx-auto mb-2 text-[#F26522]/50" />
+                      <Scissors className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" />
                       No students found. Add your first student to get started.
                     </TableCell>
                   </TableRow>
@@ -282,52 +269,49 @@ export function AdminDashboard({
 
       {/* Add Student Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent className="max-w-md border-0 shadow-2xl">
+        <DialogContent className="sm:max-w-md bg-card border-border text-foreground">
           <DialogHeader>
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#F26522] to-[#E55A1A] flex items-center justify-center mx-auto mb-2">
-              <Plus className="w-6 h-6 text-white" />
-            </div>
-            <DialogTitle className="text-lg font-bold text-[#1A1A1A] text-center">
+            <DialogTitle className="text-lg font-bold text-foreground">
               Add New Student
             </DialogTitle>
-            <DialogDescription className="text-center text-gray-600">
+            <DialogDescription className="text-muted-foreground">
               Create a new student account with auto-generated credentials.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <Label className="text-sm text-gray-700 mb-1 block font-medium">First Name</Label>
+              <Label className="text-sm text-foreground mb-1 block">First Name</Label>
               <Input
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="First Name"
+                className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                 onKeyDown={(e) => e.key === 'Enter' && handleAddStudent()}
-                className="border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors"
               />
             </div>
             <div>
-              <Label className="text-sm text-gray-700 mb-1 block font-medium">Last Name</Label>
+              <Label className="text-sm text-foreground mb-1 block">Last Name</Label>
               <Input
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Last Name"
+                className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                 onKeyDown={(e) => e.key === 'Enter' && handleAddStudent()}
-                className="border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors"
               />
             </div>
           </div>
           <div className="flex gap-3 mt-4">
             <Button
               variant="outline"
-              className="flex-1 border-gray-300 hover:bg-gray-50"
+              className="flex-1 border-border text-foreground hover:bg-accent"
               onClick={() => setShowAddModal(false)}
             >
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-gradient-to-r from-[#F26522] to-[#E55A1A] hover:from-[#E55A1A] hover:to-[#CC4D14] text-white shadow-sm hover:shadow-md transition-all"
+              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={handleAddStudent}
             >
               Create Account
@@ -341,44 +325,41 @@ export function AdminDashboard({
         open={showCredentialsModal}
         onOpenChange={setShowCredentialsModal}
       >
-        <DialogContent className="max-w-md text-center border-0 shadow-2xl">
+        <DialogContent className="sm:max-w-md bg-card border-border text-foreground text-center">
           <DialogHeader>
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#F26522] to-[#E55A1A] flex items-center justify-center mx-auto mb-3 shadow-lg">
-              <Users className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-3">
+              <Users className="w-8 h-8 text-primary" />
             </div>
-            <DialogTitle className="text-lg font-bold text-[#1A1A1A]">
+            <DialogTitle className="text-lg font-bold text-foreground">
               Student Account Created!
             </DialogTitle>
-            <DialogDescription className="text-gray-600">
+            <DialogDescription className="text-muted-foreground">
               Save these credentials securely and share them with the student.
             </DialogDescription>
           </DialogHeader>
           {generatedCreds && (
-            <div className="bg-gradient-to-br from-[#FFF5F0] to-[#FFE5D9] rounded-xl p-4 space-y-3 text-left my-4 border border-[#FFCCB3]">
-              <div className="pb-3 border-b border-[#FFCCB3]/50">
-                <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">
+            <div className="bg-muted/50 rounded-xl p-4 space-y-3 text-left my-4 border border-border">
+              <div className="pb-3 border-b border-border">
+                <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">
                   Username
                 </p>
-                <p className="text-lg font-mono font-bold text-[#1A1A1A] bg-white px-3 py-2 rounded-lg border border-[#FFCCB3]">
+                <p className="text-lg font-mono font-bold text-foreground bg-background px-3 py-2 rounded-lg border border-border mt-1">
                   {generatedCreds.username}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">
+                <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">
                   Temporary Password
                 </p>
-                <p className="text-lg font-mono font-bold text-[#F26522] bg-white px-3 py-2 rounded-lg border border-[#FFCCB3]">
+                <p className="text-lg font-mono font-bold text-primary bg-background px-3 py-2 rounded-lg border border-border mt-1">
                   {generatedCreds.password}
                 </p>
               </div>
             </div>
           )}
-          <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-            ⚠️ Student should change password on first login
-          </p>
           <Button
             onClick={() => setShowCredentialsModal(false)}
-            className="w-full bg-gradient-to-r from-[#F26522] to-[#E55A1A] hover:from-[#E55A1A] hover:to-[#CC4D14] text-white font-semibold"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
           >
             Done
           </Button>
@@ -387,25 +368,25 @@ export function AdminDashboard({
 
       {/* Reset Confirmation */}
       <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
-        <AlertDialogContent className="border-0 shadow-2xl">
+        <AlertDialogContent className="bg-card border-border text-foreground">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-[#1A1A1A]">
-              <AlertTriangle className="w-5 h-5 text-red-600" />
+            <AlertDialogTitle className="flex items-center gap-2 text-foreground">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
               Reset System
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-600">
+            <AlertDialogDescription className="text-muted-foreground">
               This will permanently clear all data including students, bookings,
               and schedules. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-gray-300 hover:bg-gray-50">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="border-border text-foreground hover:bg-accent">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 onResetData();
                 setShowResetDialog(false);
               }}
-              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
               Reset Everything
             </AlertDialogAction>
@@ -415,21 +396,18 @@ export function AdminDashboard({
 
       {/* Change Password Modal */}
       <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
-        <DialogContent className="max-w-md border-0 shadow-2xl">
+        <DialogContent className="sm:max-w-md bg-card border-border text-foreground">
           <DialogHeader>
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#F26522] to-[#E55A1A] flex items-center justify-center mx-auto mb-2">
-              <Lock className="w-6 h-6 text-white" />
-            </div>
-            <DialogTitle className="text-lg font-bold text-[#1A1A1A] text-center">
+            <DialogTitle className="text-lg font-bold text-foreground text-center">
               Change Admin Password
             </DialogTitle>
-            <DialogDescription className="text-center text-gray-600">
+            <DialogDescription className="text-center text-muted-foreground">
               Set a secure password for your account.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <Label className="text-sm text-gray-700 mb-1 block font-medium">
+              <Label className="text-sm text-foreground mb-1 block">
                 New Password (min 6 characters)
               </Label>
               <Input
@@ -437,12 +415,12 @@ export function AdminDashboard({
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="New Password"
+                className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                 onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
-                className="border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors"
               />
             </div>
             <div>
-              <Label className="text-sm text-gray-700 mb-1 block font-medium">
+              <Label className="text-sm text-foreground mb-1 block">
                 Confirm Password
               </Label>
               <Input
@@ -450,15 +428,15 @@ export function AdminDashboard({
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm Password"
+                className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                 onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
-                className="border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors"
               />
             </div>
           </div>
           <div className="flex gap-3 mt-4">
             <Button
               variant="outline"
-              className="flex-1 border-gray-300 hover:bg-gray-50"
+              className="flex-1 border-border text-foreground hover:bg-accent"
               onClick={() => {
                 setShowPasswordModal(false);
                 setNewPassword('');
@@ -468,7 +446,7 @@ export function AdminDashboard({
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-gradient-to-r from-[#F26522] to-[#E55A1A] hover:from-[#E55A1A] hover:to-[#CC4D14] text-white shadow-sm hover:shadow-md transition-all"
+              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={handleChangePassword}
             >
               Update Password
