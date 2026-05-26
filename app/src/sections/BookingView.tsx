@@ -18,8 +18,14 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import type { Service, User, Booking } from '@/types';
-import { CLINIC_TIME_SLOTS } from '@/hooks/useClinicData';
 import type { ScheduleEntry } from '@/types';
+
+// Define the time slots directly to avoid import issues
+const CLINIC_TIME_SLOTS = [
+  '9:00', '9:30', '10:00', '10:30', '11:00', '11:30',
+  '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
+  '15:00', '15:30', '16:00', '16:30', '17:00',
+];
 
 interface BookingViewProps {
   services: Service[];
@@ -42,20 +48,24 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
 
-  const categoryList = useMemo(() => Object.keys(categories), [categories]);
+  const categoryList = useMemo(() => {
+    if (!categories) return [];
+    return Object.keys(categories);
+  }, [categories]);
 
   const filteredServices = useMemo(() => {
+    if (!services) return [];
     if (!selectedCategory) return services;
     return services.filter((s) => s.category === selectedCategory);
   }, [selectedCategory, services]);
 
   const selectedService = useMemo(
-    () => services.find((s) => s.service_id === selectedServiceId) || null,
+    () => services?.find((s) => s.service_id === selectedServiceId) || null,
     [selectedServiceId, services]
   );
 
   const availableStudents = useMemo(() => {
-    if (!selectedService) return [];
+    if (!selectedService || !users) return [];
     return users.filter(
       (u) =>
         u.role === 'student' && (u.services_active || []).includes(selectedService.service_id)
@@ -63,14 +73,14 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
   }, [selectedService, users]);
 
   const bookedTimesForDate = useMemo(() => {
-    if (!selectedDate || !selectedStudentId) return [];
+    if (!selectedDate || !selectedStudentId || !bookings) return [];
     return bookings
       .filter((b) => b.student_id === selectedStudentId && b.date === selectedDate)
       .map((b) => b.time);
   }, [selectedDate, selectedStudentId, bookings]);
 
   const availableSlots = useMemo(() => {
-    if (!selectedDate || !selectedStudentId) return [];
+    if (!selectedDate || !selectedStudentId || !schedule) return [];
     return schedule.filter(
       (s) =>
         s.student_id === selectedStudentId && s.date === selectedDate && s.is_open
