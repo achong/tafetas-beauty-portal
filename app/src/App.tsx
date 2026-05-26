@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import './App.css';
 import { Navbar } from '@/sections/Navbar';
-import { Footer } from '@/sections/Footer';
 import { ServicesCatalog } from '@/sections/ServicesCatalog';
 import { BookingView } from '@/sections/BookingView';
 import { AdminLogin } from '@/sections/AdminLogin';
