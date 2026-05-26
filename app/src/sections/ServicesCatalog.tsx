@@ -18,8 +18,8 @@ const categoryIcons: Record<string, React.ReactNode> = {
 export function ServicesCatalog({ categories }: ServicesCatalogProps) {
   return (
     <div className="fade-in">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#FFF5F0]/10 to-[#FFE5D9]/10 rounded-2xl p-8 md:p-12 mb-10 border border-[#F26522]/20">
+      {/* Hero Section - Fixed: Removed border that was causing the grey ring */}
+      <div className="bg-card rounded-2xl p-8 md:p-12 mb-10">
         <div className="max-w-3xl">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Our Professional <span className="text-[#F26522]">Services</span>
@@ -40,7 +40,7 @@ export function ServicesCatalog({ categories }: ServicesCatalogProps) {
           >
             <div className="bg-[#F26522] px-6 py-4">
               <div className="flex items-center gap-3 text-white">
-                <div className="p-2 bg-card/20 rounded-lg">
+                <div className="p-2 bg-white/20 rounded-lg">
                   {categoryIcons[category] || <Sparkle className="w-5 h-5" />}
                 </div>
                 <h3 className="font-bold text-lg">{category}</h3>
@@ -66,7 +66,7 @@ export function ServicesCatalog({ categories }: ServicesCatalogProps) {
       </div>
 
       {/* CTA Section */}
-      <div className="mt-12 bg-[#1A1A1A] rounded-2xl p-8 md:p-12 text-center border border-border">
+      <div className="mt-12 bg-card border border-border rounded-2xl p-8 md:p-12 text-center">
         <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
           Ready to Book Your Appointment?
         </h3>
