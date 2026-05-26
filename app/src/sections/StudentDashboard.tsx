@@ -5,6 +5,8 @@ import {
   Lock,
   AlertTriangle,
   Sparkles,
+  Check,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -200,10 +202,10 @@ export function StudentDashboard({
 
   return (
     <div className="fade-in space-y-6">
-      {/* Welcome */}
+      {/* Welcome Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-[#1A1A1A]">
             Welcome, {currentUser.name}!
           </h2>
           <p className="text-sm text-gray-500 mt-0.5">
@@ -213,7 +215,7 @@ export function StudentDashboard({
         {currentUser.isTemp && (
           <Badge
             variant="outline"
-            className="bg-amber-50 text-amber-700 border-amber-300 px-3 py-1.5 cursor-pointer hover:bg-amber-100"
+            className="bg-[#FFF5F0] text-[#F26522] border-[#FFCCB3] px-3 py-1.5 cursor-pointer hover:bg-[#FFE5D9] hover:border-[#FF9955] transition-all"
             onClick={() => setShowPasswordModal(true)}
           >
             <AlertTriangle className="w-3.5 h-3.5 mr-1" />
@@ -224,10 +226,10 @@ export function StudentDashboard({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Service Management */}
-        <Card className="border-gray-200">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-purple-600" />
+        <Card className="border-gray-200 shadow-sm">
+          <CardHeader className="bg-gradient-to-r from-[#FFF5F0] to-white border-b border-[#FFCCB3]">
+            <CardTitle className="text-lg font-semibold text-[#1A1A1A] flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[#F26522]" />
               Manage Active Services
             </CardTitle>
           </CardHeader>
@@ -235,7 +237,7 @@ export function StudentDashboard({
             <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1">
               {categoryList.map((cat) => (
                 <div key={cat}>
-                  <h4 className="text-sm font-bold text-purple-700 bg-purple-50 px-3 py-1.5 rounded-lg mb-2">
+                  <h4 className="text-sm font-bold text-[#F26522] bg-[#FFF5F0] border border-[#FFCCB3] px-3 py-1.5 rounded-lg mb-2">
                     {cat}
                   </h4>
                   <div className="space-y-1">
@@ -248,13 +250,17 @@ export function StudentDashboard({
                         return (
                           <label
                             key={s.service_id}
-                            className="flex items-center justify-between p-2.5 border rounded-lg bg-white hover:bg-gray-50 cursor-pointer transition-colors"
+                            className={`flex items-center justify-between p-3 border rounded-xl cursor-pointer transition-all ${
+                              isActive
+                                ? 'border-[#F26522] bg-[#FFF5F0] shadow-sm'
+                                : 'border-gray-200 hover:border-[#F26522]/50 hover:bg-gray-50'
+                            }`}
                           >
                             <div>
-                              <span className="text-sm text-gray-800">
+                              <span className="text-sm text-[#1A1A1A] font-medium">
                                 {s.name}
                               </span>
-                              <span className="text-xs text-purple-600 ml-2 font-medium">
+                              <span className="text-xs text-[#F26522] ml-2 font-semibold">
                                 ${s.price.toFixed(2)}
                               </span>
                             </div>
@@ -263,6 +269,7 @@ export function StudentDashboard({
                               onCheckedChange={(checked) =>
                                 toggleService(s.service_id, checked)
                               }
+                              className="data-[state=checked]:bg-[#F26522]"
                             />
                           </label>
                         );
@@ -275,10 +282,10 @@ export function StudentDashboard({
         </Card>
 
         {/* Calendar & Availability */}
-        <Card className="border-gray-200">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <Lock className="w-5 h-5 text-blue-600" />
+        <Card className="border-gray-200 shadow-sm">
+          <CardHeader className="bg-gradient-to-r from-[#FFF5F0] to-white border-b border-[#FFCCB3]">
+            <CardTitle className="text-lg font-semibold text-[#1A1A1A] flex items-center gap-2">
+              <Lock className="w-5 h-5 text-[#F26522]" />
               Set Availability
             </CardTitle>
           </CardHeader>
@@ -289,16 +296,16 @@ export function StudentDashboard({
                 variant="ghost"
                 size="icon"
                 onClick={() => changeMonth(-1)}
-                className="hover:bg-gray-100"
+                className="hover:bg-[#FFF5F0] text-[#F26522] hover:text-[#E55A1A]"
               >
                 <ChevronLeft className="w-5 h-5" />
               </Button>
-              <span className="font-semibold text-gray-900">{monthName}</span>
+              <span className="font-semibold text-[#1A1A1A]">{monthName}</span>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => changeMonth(1)}
-                className="hover:bg-gray-100"
+                className="hover:bg-[#FFF5F0] text-[#F26522] hover:text-[#E55A1A]"
               >
                 <ChevronRight className="w-5 h-5" />
               </Button>
@@ -335,19 +342,19 @@ export function StudentDashboard({
                     onClick={() => handleDateClick(ds)}
                     className={`relative p-2 border text-center rounded-lg text-sm transition-all hover:scale-105 ${
                       isSelected
-                        ? 'bg-purple-600 text-white border-purple-600 shadow-md'
+                        ? 'bg-[#F26522] text-white border-[#F26522] shadow-md'
                         : isToday
-                        ? 'border-blue-400 bg-blue-50 text-blue-700 font-bold'
+                        ? 'border-[#F26522] bg-[#FFF5F0] text-[#F26522] font-bold'
                         : hasOpen
-                        ? 'bg-green-50 border-green-300 text-green-800 font-medium'
-                        : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                        ? 'bg-[#FFF5F0] border-[#FFCCB3] text-[#F26522] font-medium'
+                        : 'bg-white border-gray-200 text-gray-700 hover:bg-[#FFF5F0] hover:border-[#FFCCB3]'
                     }`}
                   >
                     {day}
                     {bookingCount > 0 && (
                       <span
                         className={`absolute top-0.5 right-0.5 w-2 h-2 rounded-full ${
-                          isSelected ? 'bg-white' : 'bg-amber-400'
+                          isSelected ? 'bg-white' : 'bg-[#F26522]'
                         }`}
                       />
                     )}
@@ -359,42 +366,44 @@ export function StudentDashboard({
             {/* Legend */}
             <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded bg-green-50 border border-green-300" />
+                <div className="w-3 h-3 rounded bg-[#FFF5F0] border border-[#FFCCB3]" />
                 <span>Available</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded bg-blue-50 border border-blue-400" />
+                <div className="w-3 h-3 rounded bg-[#FFF5F0] border border-[#F26522]" />
                 <span>Today</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-amber-400" />
+                <div className="w-2 h-2 rounded-full bg-[#F26522]" />
                 <span>Has Booking</span>
               </div>
             </div>
 
             {/* Slot Management */}
             {selectedDate && (
-              <div className="mt-6 border-t pt-4 animate-in fade-in slide-in-from-bottom-2">
+              <div className="mt-6 border-t border-gray-200 pt-4 animate-in fade-in slide-in-from-bottom-2">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="font-semibold text-gray-900">
+                  <p className="font-semibold text-[#1A1A1A]">
                     Slots for{' '}
-                    <span className="text-purple-600">{selectedDate}</span>
+                    <span className="text-[#F26522]">{selectedDate}</span>
                   </p>
                   <div className="flex gap-1">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs h-7 border-green-300 text-green-700 hover:bg-green-50"
+                      className="text-xs h-7 border-[#FFCCB3] text-[#F26522] hover:bg-[#FFF5F0] hover:border-[#FF9955]"
                       onClick={() => toggleAllSlots('open')}
                     >
+                      <Check className="w-3 h-3 mr-1" />
                       Open All
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs h-7 border-red-300 text-red-700 hover:bg-red-50"
+                      className="text-xs h-7 border-gray-300 text-gray-600 hover:bg-gray-50"
                       onClick={() => toggleAllSlots('closed')}
                     >
+                      <X className="w-3 h-3 mr-1" />
                       Close All
                     </Button>
                   </div>
@@ -406,12 +415,12 @@ export function StudentDashboard({
                       key={time}
                       onClick={() => !isBooked && toggleSlot(time)}
                       disabled={isBooked}
-                      className={`p-2 border rounded-lg text-xs font-semibold transition-all ${
+                      className={`p-2.5 border rounded-lg text-xs font-semibold transition-all ${
                         isBooked
-                          ? 'bg-amber-50 border-amber-300 text-amber-800 cursor-not-allowed'
+                          ? 'bg-amber-50 border-amber-200 text-amber-700 cursor-not-allowed opacity-70'
                           : isOpen
-                          ? 'bg-green-600 text-white border-green-700 hover:bg-green-700 shadow-sm'
-                          : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200'
+                          ? 'bg-[#F26522] text-white border-[#F26522] hover:bg-[#E55A1A] shadow-sm'
+                          : 'bg-white border-gray-200 text-gray-600 hover:bg-[#FFF5F0] hover:border-[#FFCCB3]'
                       }`}
                     >
                       {time}
@@ -436,21 +445,21 @@ export function StudentDashboard({
 
       {/* Change Password Modal */}
       <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md border-0 shadow-2xl">
           <DialogHeader>
-            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
-              <Lock className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#F26522] to-[#E55A1A] flex items-center justify-center mx-auto mb-2">
+              <Lock className="w-6 h-6 text-white" />
             </div>
-            <DialogTitle className="text-lg font-bold text-gray-900 text-center">
+            <DialogTitle className="text-lg font-bold text-[#1A1A1A] text-center">
               Change Password
             </DialogTitle>
-            <DialogDescription className="text-center text-gray-500">
+            <DialogDescription className="text-center text-gray-600">
               Set a secure password for your account.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <Label className="text-sm text-gray-700 mb-1 block">
+              <Label className="text-sm text-gray-700 mb-1 block font-medium">
                 New Password (min 6 characters)
               </Label>
               <Input
@@ -459,10 +468,11 @@ export function StudentDashboard({
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="New Password"
                 onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
+                className="border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors"
               />
             </div>
             <div>
-              <Label className="text-sm text-gray-700 mb-1 block">
+              <Label className="text-sm text-gray-700 mb-1 block font-medium">
                 Confirm Password
               </Label>
               <Input
@@ -471,13 +481,14 @@ export function StudentDashboard({
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm Password"
                 onKeyDown={(e) => e.key === 'Enter' && handleChangePassword()}
+                className="border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors"
               />
             </div>
           </div>
-          <div className="flex gap-3 mt-2">
+          <div className="flex gap-3 mt-4">
             <Button
               variant="outline"
-              className="flex-1"
+              className="flex-1 border-gray-300 hover:bg-gray-50"
               onClick={() => {
                 setShowPasswordModal(false);
                 setNewPassword('');
@@ -487,7 +498,7 @@ export function StudentDashboard({
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+              className="flex-1 bg-gradient-to-r from-[#F26522] to-[#E55A1A] hover:from-[#E55A1A] hover:to-[#CC4D14] text-white shadow-sm hover:shadow-md transition-all"
               onClick={handleChangePassword}
             >
               Update Password
