@@ -141,7 +141,6 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
 
   const handleCloseConfirm = () => {
     setShowConfirm(false);
-    // Reset form
     setSelectedCategory('');
     setSelectedServiceId('');
     setSelectedStudentId('');
@@ -165,23 +164,23 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
   return (
     <div className="fade-in max-w-5xl mx-auto">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#FFF5F0] to-[#FFE5D9] rounded-2xl p-6 md:p-8 mb-8 border border-[#FFCCB3]">
+      <div className="bg-muted/30 rounded-2xl p-6 md:p-8 mb-8 border border-border">
         <div className="flex items-start gap-4">
-          <div className="p-3 bg-[#F26522] rounded-xl shadow-lg">
-            <Calendar className="w-6 h-6 text-white" />
+          <div className="p-3 bg-primary rounded-xl shadow-lg">
+            <Calendar className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-[#1A1A1A] mb-2">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
               Book Your Appointment
             </h2>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Select your service, choose a student, and pick a convenient time slot.
             </p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6 md:p-8">
+      <div className="bg-card rounded-2xl shadow-md border border-border p-6 md:p-8">
         {/* Progress Steps */}
         <div className="flex items-center justify-center gap-2 md:gap-4 mb-8 overflow-x-auto pb-2">
           {steps.map((step, i) => (
@@ -189,21 +188,21 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
               <div
                 className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
                   step.done
-                    ? 'bg-[#F26522] text-white shadow-md'
-                    : 'bg-gray-100 text-gray-400 border-2 border-gray-200'
+                    ? 'bg-primary text-primary-foreground shadow-md'
+                    : 'bg-muted text-muted-foreground border border-border'
                 }`}
               >
                 {step.done ? <Check className="w-4 h-4 md:w-5 md:h-5" /> : i + 1}
               </div>
               <span
                 className={`text-xs md:text-sm font-medium ${
-                  step.done ? 'text-[#F26522] font-semibold' : 'text-gray-400'
+                  step.done ? 'text-primary font-semibold' : 'text-muted-foreground'
                 }`}
               >
                 {step.label}
               </span>
               {i < steps.length - 1 && (
-                <div className={`w-6 md:w-12 h-0.5 ${step.done ? 'bg-[#F26522]' : 'bg-gray-200'}`} />
+                <div className={`w-6 md:w-12 h-0.5 ${step.done ? 'bg-primary' : 'bg-border'}`} />
               )}
             </div>
           ))}
@@ -212,14 +211,14 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
         {/* Service Selection */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
-            <Label className="text-sm font-semibold text-gray-700 mb-2 block">
+            <Label className="text-sm font-semibold text-foreground mb-2 block">
               Service Category
             </Label>
             <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-              <SelectTrigger className="w-full border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors">
+              <SelectTrigger className="w-full bg-background border-border focus:ring-primary">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-popover border-border">
                 <SelectItem value="">All Categories</SelectItem>
                 {categoryList.map((c) => (
                   <SelectItem key={c} value={c}>
@@ -230,20 +229,20 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
             </Select>
           </div>
           <div>
-            <Label className="text-sm font-semibold text-gray-700 mb-2 block">
+            <Label className="text-sm font-semibold text-foreground mb-2 block">
               Specific Service
             </Label>
             <Select value={selectedServiceId} onValueChange={handleServiceChange}>
-              <SelectTrigger className="w-full border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors">
+              <SelectTrigger className="w-full bg-background border-border focus:ring-primary">
                 <SelectValue placeholder="Select a Service" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-popover border-border">
                 <SelectItem value="">Select a Service</SelectItem>
                 {filteredServices.map((s) => (
                   <SelectItem key={s.service_id} value={s.service_id}>
-                    <div className="flex justify-between items-center w-full">
-                      <span>{s.name}</span>
-                      <span className="font-bold text-[#F26522]">${s.price.toFixed(2)}</span>
+                    <div className="flex justify-between items-center w-full gap-4">
+                      <span className="truncate">{s.name}</span>
+                      <span className="font-bold text-primary shrink-0">${s.price.toFixed(2)}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -254,24 +253,24 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
 
         {/* Selected Service Info */}
         {selectedService && (
-          <div className="bg-gradient-to-r from-[#FFF5F0] to-[#FFE5D9] border-l-4 border-[#F26522] rounded-xl p-4 mb-6 animate-in fade-in slide-in-from-bottom-2">
+          <div className="bg-primary/10 border-l-4 border-primary rounded-xl p-4 mb-6 animate-in fade-in slide-in-from-bottom-2">
             <div className="flex justify-between items-start">
               <div className="flex items-start gap-3">
-                <div className="p-2 bg-[#F26522]/10 rounded-lg">
-                  <Sparkles className="w-5 h-5 text-[#F26522]" />
+                <div className="p-2 bg-primary/20 rounded-lg">
+                  <Sparkles className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-[#1A1A1A] font-semibold text-lg">
+                  <p className="text-foreground font-semibold text-lg">
                     {selectedService.name}
                   </p>
-                  <p className="text-gray-600 text-sm">{selectedService.category}</p>
+                  <p className="text-muted-foreground text-sm">{selectedService.category}</p>
                 </div>
               </div>
-              <p className="text-[#F26522] text-2xl font-bold">
+              <p className="text-primary text-2xl font-bold">
                 ${selectedService.price.toFixed(2)}
               </p>
             </div>
-            <p className="text-amber-700 text-sm mt-3 font-medium flex items-center gap-1.5 bg-amber-50/50 p-2 rounded-lg">
+            <p className="text-amber-500 text-sm mt-3 font-medium flex items-center gap-1.5 bg-amber-500/10 p-2 rounded-lg">
               <AlertCircle className="w-4 h-4" />
               Payment is required at the clinic desk at the time of your appointment.
             </p>
@@ -281,7 +280,7 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
         {/* Student Selection */}
         {selectedService && (
           <div className="mb-6 animate-in fade-in slide-in-from-bottom-2">
-            <Label className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+            <Label className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
               <UserIcon className="w-4 h-4" />
               Select Student
             </Label>
@@ -292,8 +291,8 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
                     key={s.uid}
                     className={`flex items-center p-3 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
                       selectedStudentId === s.uid
-                        ? 'border-[#F26522] bg-[#FFF5F0] shadow-sm'
-                        : 'border-gray-200 hover:border-[#F26522]/50 hover:bg-gray-50'
+                        ? 'border-primary bg-primary/10 shadow-sm'
+                        : 'border-border hover:border-primary/50 hover:bg-muted/50'
                     }`}
                   >
                     <input
@@ -302,18 +301,18 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
                       value={s.uid}
                       checked={selectedStudentId === s.uid}
                       onChange={() => handleStudentSelect(s.uid)}
-                      className="mr-3 w-4 h-4 text-[#F26522] border-gray-300 focus:ring-[#F26522]"
+                      className="mr-3 w-4 h-4 text-primary border-border focus:ring-primary"
                     />
                     <div>
-                      <span className="font-medium text-gray-900">{s.name}</span>
-                      <span className="text-xs text-gray-400 ml-2 font-mono">
+                      <span className="font-medium text-foreground">{s.name}</span>
+                      <span className="text-xs text-muted-foreground ml-2 font-mono">
                         @{s.username}
                       </span>
                     </div>
                   </label>
                 ))
               ) : (
-                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
+                <p className="text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex items-center gap-2">
                   <AlertCircle className="w-4 h-4" />
                   No students currently offering this service.
                 </p>
@@ -325,7 +324,7 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
         {/* Date Selection */}
         {selectedStudentId && (
           <div className="mb-6 animate-in fade-in slide-in-from-bottom-2">
-            <Label className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+            <Label className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
               <Calendar className="w-4 h-4" />
               Select Date
             </Label>
@@ -334,7 +333,7 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
               value={selectedDate}
               onChange={(e) => handleDateChange(e.target.value)}
               min={minDate}
-              className="w-full md:w-64 border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors"
+              className="w-full md:w-64 bg-background border-border focus:ring-primary"
             />
           </div>
         )}
@@ -342,7 +341,7 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
         {/* Time Slots */}
         {selectedDate && (
           <div className="mb-6 animate-in fade-in slide-in-from-bottom-2">
-            <Label className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+            <Label className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
               <Clock className="w-4 h-4" />
               Available Time Slots
             </Label>
@@ -353,18 +352,16 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
                 return (
                   <button
                     key={t}
-                    onClick={() =>
-                      status === 'available' && handleTimeSelect(t)
-                    }
+                    onClick={() => status === 'available' && handleTimeSelect(t)}
                     disabled={status !== 'available'}
                     className={`p-2.5 border-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                       isSelected
-                        ? 'bg-[#F26522] text-white border-[#F26522] shadow-md transform scale-105'
+                        ? 'bg-primary text-primary-foreground border-primary shadow-md transform scale-105'
                         : status === 'booked'
-                        ? 'bg-amber-50 border-amber-200 text-amber-700 cursor-not-allowed opacity-70'
+                        ? 'bg-amber-500/10 border-amber-500/30 text-amber-500 cursor-not-allowed opacity-70'
                         : status === 'available'
-                        ? 'bg-white text-gray-700 border-gray-200 hover:border-[#F26522] hover:bg-[#FFF5F0] hover:text-[#F26522]'
-                        : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                        ? 'bg-background text-foreground border-border hover:border-primary hover:bg-primary/10'
+                        : 'bg-muted/50 text-muted-foreground border-border cursor-not-allowed'
                     }`}
                   >
                     {t}
@@ -372,7 +369,7 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
                       <span className="block text-[10px] opacity-70 mt-0.5">Booked</span>
                     )}
                     {status === 'available' && !isSelected && (
-                      <span className="block text-[10px] text-[#F26522] opacity-70 mt-0.5">Available</span>
+                      <span className="block text-[10px] text-primary opacity-70 mt-0.5">Available</span>
                     )}
                   </button>
                 );
@@ -383,49 +380,49 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
 
         {/* Client Details */}
         {selectedTime && (
-          <div className="border-t border-gray-200 pt-6 animate-in fade-in slide-in-from-bottom-2">
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-[#1A1A1A]">
-              <CreditCard className="w-5 h-5 text-[#F26522]" />
+          <div className="border-t border-border pt-6 animate-in fade-in slide-in-from-bottom-2">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-foreground">
+              <CreditCard className="w-5 h-5 text-primary" />
               Your Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div>
-                <Label className="text-sm text-gray-700 mb-1 block">Full Name *</Label>
+                <Label className="text-sm text-foreground mb-1 block">Full Name *</Label>
                 <Input
                   type="text"
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
                   placeholder="Full Name"
                   required
-                  className="border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors"
+                  className="bg-background border-border focus:ring-primary"
                 />
               </div>
               <div>
-                <Label className="text-sm text-gray-700 mb-1 block">Email Address *</Label>
+                <Label className="text-sm text-foreground mb-1 block">Email Address *</Label>
                 <Input
                   type="email"
                   value={clientEmail}
                   onChange={(e) => setClientEmail(e.target.value)}
                   placeholder="Email Address"
                   required
-                  className="border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors"
+                  className="bg-background border-border focus:ring-primary"
                 />
               </div>
               <div className="md:col-span-2">
-                <Label className="text-sm text-gray-700 mb-1 block">Phone Number</Label>
+                <Label className="text-sm text-foreground mb-1 block">Phone Number</Label>
                 <Input
                   type="tel"
                   value={clientPhone}
                   onChange={(e) => setClientPhone(e.target.value)}
                   placeholder="Phone Number"
-                  className="border-gray-300 focus:border-[#F26522] focus:ring-[#F26522]/20 hover:border-[#F26522] transition-colors"
+                  className="bg-background border-border focus:ring-primary"
                 />
               </div>
             </div>
             <Button
               onClick={handleConfirm}
               disabled={!clientName.trim() || !clientEmail.trim()}
-              className="w-full bg-gradient-to-r from-[#F26522] to-[#E55A1A] hover:from-[#E55A1A] hover:to-[#CC4D14] text-white py-6 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
             >
               Confirm Booking
             </Button>
@@ -435,54 +432,54 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
 
       {/* Booking Confirmation Modal */}
       <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
-        <DialogContent className="max-w-md text-center border-0 shadow-2xl">
+        <DialogContent className="max-w-md text-center border-border bg-popover">
           <DialogHeader>
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#F26522] to-[#E55A1A] flex items-center justify-center mx-auto mb-3 shadow-lg">
-              <Check className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mx-auto mb-3 shadow-lg">
+              <Check className="w-8 h-8 text-primary-foreground" />
             </div>
-            <DialogTitle className="text-xl font-bold text-[#1A1A1A]">
+            <DialogTitle className="text-xl font-bold text-foreground">
               Booking Confirmed!
             </DialogTitle>
-            <DialogDescription className="text-gray-600">
+            <DialogDescription className="text-muted-foreground">
               Your appointment has been booked successfully.
             </DialogDescription>
           </DialogHeader>
 
           {confirmedBooking && (
-            <div className="bg-gradient-to-br from-[#FFF5F0] to-[#FFE5D9] rounded-xl p-4 text-left text-sm space-y-3 my-4 border border-[#FFCCB3]">
-              <div className="flex justify-between items-center pb-2 border-b border-[#FFCCB3]/50">
-                <span className="font-medium text-gray-700">Service:</span>
-                <span className="font-semibold text-[#1A1A1A]">{confirmedBooking.service?.name}</span>
+            <div className="bg-muted/30 rounded-xl p-4 text-left text-sm space-y-3 my-4 border border-border">
+              <div className="flex justify-between items-center pb-2 border-b border-border">
+                <span className="font-medium text-muted-foreground">Service:</span>
+                <span className="font-semibold text-foreground">{confirmedBooking.service?.name}</span>
               </div>
-              <div className="flex justify-between items-center pb-2 border-b border-[#FFCCB3]/50">
-                <span className="font-medium text-gray-700">Date & Time:</span>
-                <span className="font-semibold text-[#1A1A1A]">
+              <div className="flex justify-between items-center pb-2 border-b border-border">
+                <span className="font-medium text-muted-foreground">Date & Time:</span>
+                <span className="font-semibold text-foreground">
                   {confirmedBooking.time} on {confirmedBooking.date}
                 </span>
               </div>
-              <div className="flex justify-between items-center pb-2 border-b border-[#FFCCB3]/50">
-                <span className="font-medium text-gray-700">Student:</span>
-                <span className="font-semibold text-[#1A1A1A]">
+              <div className="flex justify-between items-center pb-2 border-b border-border">
+                <span className="font-medium text-muted-foreground">Student:</span>
+                <span className="font-semibold text-foreground">
                   {users.find((u) => u.uid === confirmedBooking.student_id)?.name}
                 </span>
               </div>
               <div className="flex justify-between items-center pt-2">
-                <span className="font-medium text-gray-700">Amount Due:</span>
-                <span className="text-[#F26522] font-bold text-lg">
+                <span className="font-medium text-muted-foreground">Amount Due:</span>
+                <span className="text-primary font-bold text-lg">
                   ${confirmedBooking.service?.price.toFixed(2)}
                 </span>
               </div>
             </div>
           )}
 
-          <p className="text-sm text-amber-700 font-medium mb-4 flex items-center justify-center gap-1.5 bg-amber-50 p-3 rounded-lg">
+          <p className="text-sm text-amber-500 font-medium mb-4 flex items-center justify-center gap-1.5 bg-amber-500/10 p-3 rounded-lg">
             <AlertCircle className="w-4 h-4" />
             Payment is required at the clinic desk at the time of your appointment.
           </p>
 
           <Button
             onClick={handleCloseConfirm}
-            className="w-full bg-gradient-to-r from-[#F26522] to-[#E55A1A] hover:from-[#E55A1A] hover:to-[#CC4D14] text-white font-semibold"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
           >
             Done
           </Button>
