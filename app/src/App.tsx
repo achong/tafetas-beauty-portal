@@ -210,11 +210,8 @@ function App() {
             onUpdateSchedule={handleUpdateSchedule}
           />
         ) : (
-          <StudentLogin
-            onLogin={handleLogin}
-            onSwitchView={handleSwitchView}
-          />
-        )
+          <StudentLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
+                )
       
       case 'student-dashboard':
         return currentUser?.role === 'student' ? (

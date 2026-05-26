@@ -1,4 +1,3 @@
-import { QuerySnapshot, DocumentData } from 'firebase/firestore';
 import { useState, useEffect, useCallback } from 'react';
 import { 
   collection, 
@@ -10,6 +9,7 @@ import {
   onSnapshot,
   writeBatch,
   QuerySnapshot,
+  DocumentData
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { User, Service, ScheduleEntry, Booking } from '@/types';
@@ -110,6 +110,7 @@ export async function initializeData(): Promise<void> {
   }
 }
 
+// MOVED: resetAllData must be defined BEFORE useClinicData so it can be returned and exported
 export async function resetAllData(): Promise<void> {
   try {
     const collections = ['users', 'services', 'schedule', 'bookings'];
@@ -136,65 +137,69 @@ export function useClinicData() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-const unsubscribeUsers = onSnapshot(
-  collection(db, 'users'),
-  (snapshot: QuerySnapshot<DocumentData>) => {
-    const usersData = snapshot.docs.map(doc => ({
-      uid: doc.id,
-      ...doc.data()
-    } as User));
-    setUsersState(usersData);
-  },
-  (err: Error) => {
-    console.error('Error listening to users:', err);
-    setError('Failed to load users');
-  }
-);
+    // ✅ Users
+    const unsubscribeUsers = onSnapshot(
+      collection(db, 'users'),
+      (snapshot: QuerySnapshot<DocumentData>) => {
+        const usersData = snapshot.docs.map(doc => ({
+          uid: doc.id,
+          ...doc.data()
+        } as User));
+        setUsersState(usersData);
+      },
+      (err: Error) => {
+        console.error('Error listening to users:', err);
+        setError('Failed to load users');
+      }
+    );
 
+    // ✅ Services (Fixed: was previously setting Users)
     const unsubscribeServices = onSnapshot(
       collection(db, 'services'),
-  (snapshot: QuerySnapshot<DocumentData>) => {
-    const usersData = snapshot.docs.map(doc => ({
-      uid: doc.id,
-      ...doc.data()
-    } as User));
-    setUsersState(usersData);
-  },
-  (err: Error) => {
-    console.error('Error listening to users:', err);
-    setError('Failed to load users');
-  }
-);
+      (snapshot: QuerySnapshot<DocumentData>) => {
+        const servicesData = snapshot.docs.map(doc => ({
+          service_id: doc.id,
+          ...doc.data()
+        } as Service));
+        setServicesState(servicesData);
+      },
+      (err: Error) => {
+        console.error('Error listening to services:', err);
+        setError('Failed to load services');
+      }
+    );
 
+    // ✅ Schedule (Fixed: was previously setting Users)
     const unsubscribeSchedule = onSnapshot(
       collection(db, 'schedule'),
-  (snapshot: QuerySnapshot<DocumentData>) => {
-    const usersData = snapshot.docs.map(doc => ({
-      uid: doc.id,
-      ...doc.data()
-    } as User));
-    setUsersState(usersData);
-  },
-  (err: Error) => {
-    console.error('Error listening to users:', err);
-    setError('Failed to load users');
-  }
-);
+      (snapshot: QuerySnapshot<DocumentData>) => {
+        const scheduleData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as ScheduleEntry & { id: string }));
+        setScheduleState(scheduleData.map(({ id, ...rest }) => rest));
+      },
+      (err: Error) => {
+        console.error('Error listening to schedule:', err);
+        setError('Failed to load schedule');
+      }
+    );
 
+    // ✅ Bookings (Fixed: was previously setting Users)
     const unsubscribeBookings = onSnapshot(
       collection(db, 'bookings'),
-  (snapshot: QuerySnapshot<DocumentData>) => {
-    const usersData = snapshot.docs.map(doc => ({
-      uid: doc.id,
-      ...doc.data()
-    } as User));
-    setUsersState(usersData);
-  },
-  (err: Error) => {
-    console.error('Error listening to users:', err);
-    setError('Failed to load users');
-  }
-);
+      (snapshot: QuerySnapshot<DocumentData>) => {
+        const bookingsData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as Booking));
+        setBookingsState(bookingsData);
+      },
+      (err: Error) => {
+        console.error('Error listening to bookings:', err);
+        setError('Failed to load bookings');
+      }
+    );
 
     initializeData();
     setLoading(false);
@@ -283,5 +288,3 @@ const unsubscribeUsers = onSnapshot(
     SERVICE_CATEGORIES,
   };
 }
-
-export { resetAllData };
