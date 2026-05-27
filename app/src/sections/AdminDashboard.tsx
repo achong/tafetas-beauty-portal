@@ -66,6 +66,7 @@ export function AdminDashboard({
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [studentEmail, setStudentEmail] = useState('');
   const [generatedCreds, setGeneratedCreds] = useState<{
     username: string;
     password: string;
@@ -117,25 +118,43 @@ export function AdminDashboard({
   const handleAddStudent = () => {
     const f = firstName.trim();
     const l = lastName.trim();
+    const email = studentEmail.trim().toLowerCase();
+    
+    // Validate inputs
     if (!f || !l) {
       alert('Please enter both First and Last Name.');
       return;
     }
-    const username = `${f.toLowerCase()}.${l.toLowerCase()}.${new Date().getFullYear()}`;
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      alert('Please enter a valid email address (e.g., student@gmail.com)');
+      return;
+    }
+
     const password = Math.random().toString(36).slice(-8);
+
     const student: User = {
       uid: `st_${Date.now()}`,
       role: 'student',
       name: `${f} ${l}`,
-      username,
-      password,
+      username: email,
+      email: email,
+      password: password,
       isTemp: true,
       services_active: [],
     };
+
     onAddStudent(student);
-    setGeneratedCreds({ username, password });
+    
+    // Show credentials with the full email
+    setGeneratedCreds({ username: email, password });
+    
+    // Reset form
     setFirstName('');
     setLastName('');
+    setStudentEmail('');
     setShowAddModal(false);
     setShowCredentialsModal(true);
   };
@@ -215,7 +234,7 @@ export function AdminDashboard({
               <TableHeader>
                 <TableRow className="border-border hover:bg-transparent">
                   <TableHead className="text-muted-foreground font-medium">Name</TableHead>
-                  <TableHead className="text-muted-foreground font-medium">Username</TableHead>
+                  <TableHead className="text-muted-foreground font-medium">Email</TableHead>
                   <TableHead className="text-muted-foreground font-medium">Active Services</TableHead>
                   <TableHead className="text-right text-muted-foreground font-medium">Actions</TableHead>
                 </TableRow>
@@ -228,7 +247,7 @@ export function AdminDashboard({
                         {s.name}
                       </TableCell>
                       <TableCell className="font-mono text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1">
-                        {s.username}
+                        {s.email || s.username}
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -275,7 +294,7 @@ export function AdminDashboard({
               Add New Student
             </DialogTitle>
             <DialogDescription className="text-muted-foreground">
-              Create a new student account with auto-generated credentials.
+              Create a new student account. They will log in with their email address.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
@@ -286,6 +305,17 @@ export function AdminDashboard({
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="First Name"
+                className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                onKeyDown={(e) => e.key === 'Enter' && handleAddStudent()}
+              />
+            </div>
+            <div>
+              <Label className="text-sm text-foreground mb-1 block">Email Address</Label>
+              <Input
+                type="email"
+                value={studentEmail}
+                onChange={(e) => setStudentEmail(e.target.value)}
+                placeholder="student@example.com"
                 className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                 onKeyDown={(e) => e.key === 'Enter' && handleAddStudent()}
               />
@@ -341,7 +371,7 @@ export function AdminDashboard({
             <div className="bg-muted/50 rounded-xl p-4 space-y-3 text-left my-4 border border-border">
               <div className="pb-3 border-b border-border">
                 <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">
-                  Username
+                  Login Email
                 </p>
                 <p className="text-lg font-mono font-bold text-foreground bg-background px-3 py-2 rounded-lg border border-border mt-1">
                   {generatedCreds.username}
