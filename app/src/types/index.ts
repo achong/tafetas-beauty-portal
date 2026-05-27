@@ -3,9 +3,10 @@ export interface User {
   role: 'admin' | 'student';
   name: string;
   username: string;
+  email?: string;
   password: string;
   isTemp: boolean;
-  services_active?: string[];
+  services_active: string[];
 }
 
 export interface Service {
