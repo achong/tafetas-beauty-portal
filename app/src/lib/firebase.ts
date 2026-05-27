@@ -3,7 +3,7 @@ import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAROc3TUVMLIbvfg0zsKkJKGdGDGYOC2sc", // ← Must match Firebase EXACTLY
+  apiKey: "NP1GxYY9GTgdjcpCesXXiHp3v6R2", // ← Must match Firebase EXACTLY
   authDomain: "tafetas-3ac45.firebaseapp.com",
   projectId: "tafetas-3ac45",
   storageBucket: "tafetas-3ac45.firebasestorage.app",
