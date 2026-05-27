@@ -94,6 +94,7 @@ export async function initializeData(): Promise<void> {
         username: 'admin',
         password: 'admin123',
         isTemp: false,
+        services_active: [],
       };
       await setDoc(doc(db, 'users', adminUser.uid), adminUser as DocumentData);
 
