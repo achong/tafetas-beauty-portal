@@ -20,6 +20,8 @@ import { StudentDashboard } from '@/sections/StudentDashboard'
 import { useClinicData, resetAllData } from '@/hooks/useClinicData'
 import type { User, ViewName, Booking, ScheduleEntry } from '@/types'
 
+import { onAuthStateChanged, signOut, User as FirebaseUser, createUserWithEmailAndPassword } from 'firebase/auth'
+
 function App() {
   const [currentView, setCurrentView] = useState<ViewName>('catalog')
   const [currentUser, setCurrentUser] = useState<User | null>(null)
@@ -96,10 +98,29 @@ function App() {
   }, [currentUser])
 
   // Admin actions
-  const handleAddStudent = useCallback((student: User) => {
-    addUser(student)
-    refresh()
-  }, [addUser, refresh])
+  const handleAddStudent = useCallback(async (student: User) => {
+    try {
+      // 1. Create user in Firebase Authentication
+      const authResult = await createUserWithEmailAndPassword(auth, student.email!, student.password);
+      
+      // 2. Update student object with the real Firebase UID
+      const studentWithAuthUid = { 
+        ...student, 
+        uid: authResult.user.uid 
+      };
+      
+      // 3. Save to Firestore
+      await addUser(studentWithAuthUid);
+      refresh();
+    } catch (err: any) {
+      console.error('Failed to create student:', err);
+      if (err.code === 'auth/email-already-in-use') {
+        alert('A user with this email already exists.');
+      } else {
+        alert('Error creating student. Check console for details.');
+      }
+    }
+  }, [addUser, refresh]);
 
   const handleRemoveStudent = useCallback((uid: string) => {
     removeUser(uid)
