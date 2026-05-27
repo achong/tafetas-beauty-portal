@@ -1,6 +1,7 @@
 // src/App.tsx
 import { useState, useCallback, useEffect } from 'react'
-import { onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth'
+// ✅ Keep ONLY this import (with createUserWithEmailAndPassword):
+import { onAuthStateChanged, signOut, User as FirebaseUser, createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 import './App.css'
 
@@ -19,8 +20,6 @@ import { StudentDashboard } from '@/sections/StudentDashboard'
 // Hooks & Types
 import { useClinicData, resetAllData } from '@/hooks/useClinicData'
 import type { User, ViewName, Booking, ScheduleEntry } from '@/types'
-
-import { onAuthStateChanged, signOut, User as FirebaseUser, createUserWithEmailAndPassword } from 'firebase/auth'
 
 function App() {
   const [currentView, setCurrentView] = useState<ViewName>('catalog')
