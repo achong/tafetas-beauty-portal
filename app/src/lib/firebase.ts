@@ -2,9 +2,8 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyAROc3TUVMLIbvfg0zsKkJKGdGDGYOC2sc",
+  apiKey: "AIzaSyAROc3TUVMLIbvfg0zsKkJKGdGDY0C2sc", // ← Must match Firebase EXACTLY
   authDomain: "tafetas-3ac45.firebaseapp.com",
   projectId: "tafetas-3ac45",
   storageBucket: "tafetas-3ac45.firebasestorage.app",
@@ -17,4 +16,3 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-
