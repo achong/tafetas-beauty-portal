@@ -120,6 +120,26 @@ function App() {
     }
   }, [addUser, refresh]);
 
+  // ✅ ADD THIS NEW FUNCTION:
+const handleAddAdmin = useCallback(async (admin: User) => {
+  try {
+    const authResult = await createUserWithEmailAndPassword(auth, admin.email!, admin.password);
+    const adminWithAuthUid = { 
+      ...admin, 
+      uid: authResult.user.uid 
+    };
+    await addUser(adminWithAuthUid);
+    refresh();
+  } catch (err: any) {
+    console.error('Failed to create admin:', err);
+    if (err.code === 'auth/email-already-in-use') {
+      alert('An admin with this email already exists.');
+    } else {
+      alert('Error creating admin. Check console for details.');
+    }
+  }
+}, [addUser, refresh]);
+
   const handleRemoveStudent = useCallback((uid: string) => {
     removeUser(uid);
     refresh();
@@ -204,6 +224,7 @@ function App() {
             services={services}
             bookings={bookings}
             onAddStudent={handleAddStudent}
+            onAddAdmin={handleAddAdmin} 
             onRemoveStudent={handleRemoveStudent}
             onResetData={handleResetData}
             onUpdateUser={handleUpdateUser}
