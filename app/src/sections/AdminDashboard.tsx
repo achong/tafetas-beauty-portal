@@ -1,4 +1,6 @@
 import { useState, useMemo } from 'react';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import {
   Users,
   Scissors,
@@ -159,6 +161,30 @@ export function AdminDashboard({
     setShowCredentialsModal(true);
   };
 
+    const handleResetStudentPassword = async (studentEmail: string) => {
+    if (!confirm(`Send password reset email to ${studentEmail}?`)) {
+      return;
+    }
+    
+    try {
+      await sendPasswordResetEmail(auth, studentEmail);
+      alert(`Password reset email sent to ${studentEmail}`);
+    } catch (error: any) {
+      console.error('Error sending reset email:', error);
+      if (error.code === 'auth/user-not-found') {
+        alert('No account found for this email address');
+      } else if (error.code === 'auth/too-many-requests') {
+        alert('Too many reset requests. Please try again later');
+      } else {
+        alert('Failed to send password reset email. Check console for details.');
+      }
+    }
+  };
+
+  const handleRemove = (uid: string) => {
+    onRemoveStudent(uid);
+  };
+  
   const handleRemove = (uid: string) => {
     onRemoveStudent(uid);
   };
@@ -257,16 +283,31 @@ export function AdminDashboard({
                           {(s.services_active || []).length} active
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemove(s.uid)}
-                          className="text-red-500 hover:text-red-400 hover:bg-red-950/50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </TableCell>
+                  <TableCell className="text-right">
+  <div className="flex justify-end gap-2">
+    {/* Reset Password Button */}
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => handleResetStudentPassword(s.email || s.username)}
+      className="border-blue-900/50 text-blue-500 hover:bg-blue-950/50 hover:text-blue-400"
+      title="Send password reset email"
+    >
+      <Lock className="w-4 h-4" />
+    </Button>
+    
+    {/* Delete Button */}
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={() => handleRemove(s.uid)}
+      className="text-red-500 hover:text-red-400 hover:bg-red-950/50"
+      title="Delete student"
+    >
+      <Trash2 className="w-4 h-4" />
+    </Button>
+  </div>
+</TableCell>
                     </TableRow>
                   ))
                 ) : (
