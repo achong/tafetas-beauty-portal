@@ -185,9 +185,6 @@ export function AdminDashboard({
     onRemoveStudent(uid);
   };
   
-  const handleRemove = (uid: string) => {
-    onRemoveStudent(uid);
-  };
 
   return (
     <div className="fade-in space-y-6">

@@ -1,6 +1,5 @@
 // src/App.tsx
 import { useState, useCallback, useEffect } from 'react'
-// ✅ Keep ONLY this import (with createUserWithEmailAndPassword):
 import { onAuthStateChanged, signOut, User as FirebaseUser, createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 import './App.css'
@@ -96,43 +95,17 @@ function App() {
     setCurrentView(view)
   }, [currentUser])
 
-// Admin actions
-const handleAddStudent = useCallback(async (student: User) => {
-  try {
-    // 1. Create user in Firebase Authentication
-    const authResult = await createUserWithEmailAndPassword(auth, student.email!, student.password);
-    
-    // 2. IMMEDIATELY sign out the new student (so admin stays logged in)
-    await signOut(auth);
-    
-    // 3. Re-authenticate the admin (restore admin session)
-    // This requires the admin's email/password
-    // For now, we'll just refresh and let the admin log in again
-    // OR better: store admin credentials temporarily
-    
-    // 4. Update student object with the real Firebase UID
-    const studentWithAuthUid = { 
-      ...student, 
-      uid: authResult.user.uid 
-    };
-    
-    // 5. Save to Firestore
-    await addUser(studentWithAuthUid);
-    refresh();
-    
-    // 6. Show credentials modal (DON'T auto-close)
-    setGeneratedCreds({ username: student.email!, password: student.password });
-    setShowCredentialsModal(true);
-    
-  } catch (err: any) {
-    console.error('Failed to create student:', err);
-    if (err.code === 'auth/email-already-in-use') {
-      alert('A user with this email already exists.');
-    } else {
-      alert('Error creating student: ' + err.message);
-    }
-  }
-}, [addUser, refresh]);
+  // ✅ Admin actions - CLEAN VERSION
+  const handleAddStudent = useCallback(async (student: User) => {
+    try {
+      // 1. Create user in Firebase Authentication
+      const authResult = await createUserWithEmailAndPassword(auth, student.email!, student.password);
+      
+      // 2. Update student object with the real Firebase UID
+      const studentWithAuthUid = { 
+        ...student, 
+        uid: authResult.user.uid 
+      };
       
       // 3. Save to Firestore
       await addUser(studentWithAuthUid);
@@ -148,37 +121,37 @@ const handleAddStudent = useCallback(async (student: User) => {
   }, [addUser, refresh]);
 
   const handleRemoveStudent = useCallback((uid: string) => {
-    removeUser(uid)
-    refresh()
-  }, [removeUser, refresh])
+    removeUser(uid);
+    refresh();
+  }, [removeUser, refresh]);
 
   const handleUpdateUser = useCallback((user: User) => {
-    updateUser(user)
+    updateUser(user);
     if (currentUser?.uid === user.uid) {
-      setCurrentUser(user)
+      setCurrentUser(user);
     }
-    refresh()
-  }, [updateUser, currentUser, refresh])
+    refresh();
+  }, [updateUser, currentUser, refresh]);
 
   const handleUpdateSchedule = useCallback((newSchedule: ScheduleEntry[]) => {
-    setSchedule(newSchedule)
-    refresh()
-  }, [setSchedule, refresh])
+    setSchedule(newSchedule);
+    refresh();
+  }, [setSchedule, refresh]);
 
   // Booking
   const handleBook = useCallback((booking: Booking) => {
-    addBooking(booking)
-    refresh()
-  }, [addBooking, refresh])
+    addBooking(booking);
+    refresh();
+  }, [addBooking, refresh]);
 
   // Reset
   const handleResetData = useCallback(() => {
-    resetAllData()
-    setCurrentUser(null)
-    setCurrentView('catalog')
-    refresh()
-    window.location.reload()
-  }, [refresh])
+    resetAllData();
+    setCurrentUser(null);
+    setCurrentView('catalog');
+    refresh();
+    window.location.reload();
+  }, [refresh]);
 
   // Show loading state while checking auth
   if (authLoading) {
@@ -208,7 +181,6 @@ const handleAddStudent = useCallback(async (student: User) => {
         )
       
       case 'admin-login':
-        // If already logged in as admin, show dashboard directly
         return currentUser?.role === 'admin' ? (
           <AdminDashboard
             currentUser={currentUser}
@@ -221,7 +193,7 @@ const handleAddStudent = useCallback(async (student: User) => {
             onUpdateUser={handleUpdateUser}
           />
         ) : (
-     <AdminLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
+          <AdminLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
         )
       
       case 'admin-dashboard':
@@ -244,7 +216,6 @@ const handleAddStudent = useCallback(async (student: User) => {
         )
       
       case 'student-login':
-        // If already logged in as student, show dashboard directly
         return currentUser?.role === 'student' ? (
           <StudentDashboard
             currentUser={currentUser}
@@ -257,7 +228,7 @@ const handleAddStudent = useCallback(async (student: User) => {
           />
         ) : (
           <StudentLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
-                )
+        )
       
       case 'student-dashboard':
         return currentUser?.role === 'student' ? (
