@@ -96,17 +96,43 @@ function App() {
     setCurrentView(view)
   }, [currentUser])
 
-  // Admin actions
-  const handleAddStudent = useCallback(async (student: User) => {
-    try {
-      // 1. Create user in Firebase Authentication
-      const authResult = await createUserWithEmailAndPassword(auth, student.email!, student.password);
-      
-      // 2. Update student object with the real Firebase UID
-      const studentWithAuthUid = { 
-        ...student, 
-        uid: authResult.user.uid 
-      };
+// Admin actions
+const handleAddStudent = useCallback(async (student: User) => {
+  try {
+    // 1. Create user in Firebase Authentication
+    const authResult = await createUserWithEmailAndPassword(auth, student.email!, student.password);
+    
+    // 2. IMMEDIATELY sign out the new student (so admin stays logged in)
+    await signOut(auth);
+    
+    // 3. Re-authenticate the admin (restore admin session)
+    // This requires the admin's email/password
+    // For now, we'll just refresh and let the admin log in again
+    // OR better: store admin credentials temporarily
+    
+    // 4. Update student object with the real Firebase UID
+    const studentWithAuthUid = { 
+      ...student, 
+      uid: authResult.user.uid 
+    };
+    
+    // 5. Save to Firestore
+    await addUser(studentWithAuthUid);
+    refresh();
+    
+    // 6. Show credentials modal (DON'T auto-close)
+    setGeneratedCreds({ username: student.email!, password: student.password });
+    setShowCredentialsModal(true);
+    
+  } catch (err: any) {
+    console.error('Failed to create student:', err);
+    if (err.code === 'auth/email-already-in-use') {
+      alert('A user with this email already exists.');
+    } else {
+      alert('Error creating student: ' + err.message);
+    }
+  }
+}, [addUser, refresh]);
       
       // 3. Save to Firestore
       await addUser(studentWithAuthUid);
