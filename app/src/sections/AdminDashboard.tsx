@@ -48,8 +48,8 @@ interface AdminDashboardProps {
   users: User[];
   services: Service[];
   bookings: Booking[];
-  onAddStudent: (student: User) => void;
-  onAddAdmin: (admin: User) => void;
+  onAddStudent: (student: User) => Promise<void>; // ✅ Added Promise<void>
+  onAddAdmin: (admin: User) => Promise<void>;     // ✅ Added Promise<void>
   onRemoveStudent: (uid: string) => void;
   onResetData: () => void;
   onUpdateUser: (user: User) => void;
@@ -128,7 +128,7 @@ export function AdminDashboard({
     alert('Password updated successfully');
   };
 
-  const handleAddStudent = () => {
+  const handleAddStudent = async () => {
     const f = firstName.trim();
     const l = lastName.trim();
     const email = studentEmail.trim().toLowerCase();
@@ -157,13 +157,20 @@ export function AdminDashboard({
       services_active: [],
     };
 
-    onAddStudent(student);
-    setGeneratedCreds({ username: email, password });
-    setFirstName('');
-    setLastName('');
-    setStudentEmail('');
-    setShowAddModal(false);
-    setShowCredentialsModal(true);
+    try {
+      // ✅ WAIT for the creation to finish!
+      await onAddStudent(student);
+      
+      // Only show credentials if it was successful
+      setGeneratedCreds({ username: email, password });
+      setFirstName('');
+      setLastName('');
+      setStudentEmail('');
+      setShowAddModal(false);
+      setShowCredentialsModal(true);
+    } catch (error) {
+      console.error('Failed to add student:', error);
+    }
   };
 
   const handleAddAdmin = () => {

@@ -104,6 +104,19 @@ export function BookingView({
     );
   }, [selectedDate, selectedStudentId, schedule]);
 
+  // Get unique available dates for the selected student
+  const availableDates = useMemo(() => {
+    if (!selectedStudentId || !schedule) return [];
+    const today = new Date().toISOString().split('T')[0];
+    
+    const dates = schedule
+      .filter((s) => s.student_id === selectedStudentId && s.date >= today && s.is_open)
+      .map((s) => s.date);
+      
+    // Return unique dates, sorted chronologically
+    return [...new Set(dates)].sort();
+  }, [selectedStudentId, schedule]);
+
   const timeSlotStatus = useMemo(() => {
     const status: Record<string, 'available' | 'booked' | 'closed'> = {};
     CLINIC_TIME_SLOTS.forEach((t) => {
@@ -400,18 +413,56 @@ export function BookingView({
           <div className="mb-6 animate-in fade-in slide-in-from-bottom-2">
             <Label className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
               <Calendar className="w-4 h-4" />
-              Select Date
+              Select Available Date
             </Label>
-            <Input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => handleDateChange(e.target.value)}
-              min={minDate}
-              className="w-full md:w-64 bg-background border-border focus:ring-primary"
-            />
+            
+            {availableDates.length > 0 ? (
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                {availableDates.map((date) => {
+                  const isSelected = selectedDate === date;
+                  const dateObj = new Date(date);
+                  // Fix timezone offset issue for accurate day display
+                  const userTimezoneOffset = dateObj.getTimezoneOffset() * 60000;
+                  const adjustedDateObj = new Date(dateObj.getTime() + userTimezoneOffset);
+                  
+                  const dayName = adjustedDateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                  const dayNum = adjustedDateObj.getDate();
+                  const monthName = adjustedDateObj.toLocaleDateString('en-US', { month: 'short' });
+
+                  return (
+                    <button
+                      key={date}
+                      onClick={() => handleDateChange(date)}
+                      className={`p-3 border-2 rounded-xl flex flex-col items-center justify-center transition-all duration-200 ${
+                        isSelected
+                          ? 'bg-primary text-primary-foreground border-primary shadow-md transform scale-105'
+                          : 'bg-background text-foreground border-border hover:border-primary hover:bg-primary/10'
+                      }`}
+                    >
+                      <div className="text-[10px] font-bold uppercase tracking-wider opacity-80">
+                        {dayName}
+                      </div>
+                      <div className="text-xl font-bold leading-tight my-0.5">
+                        {dayNum}
+                      </div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider opacity-80">
+                        {monthName}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
+                <p className="text-sm text-red-500">
+                  No available dates found for this student. Please select a different student.
+                </p>
+              </div>
+            )}
           </div>
         )}
-
+        
         {/* Time Slots */}
         {selectedDate && (
           <div className="mb-6 animate-in fade-in slide-in-from-bottom-2">

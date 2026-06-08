@@ -1,5 +1,6 @@
 // src/App.tsx
 import { useState, useCallback, useEffect } from 'react'
+import { initializeApp } from 'firebase/app'
 import { onAuthStateChanged, signOut, User as FirebaseUser, createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 import './App.css'
@@ -20,10 +21,15 @@ import { StudentDashboard } from '@/sections/StudentDashboard'
 import { useClinicData, resetAllData } from '@/hooks/useClinicData'
 import type { User, ViewName, Booking, ScheduleEntry } from '@/types'
 
+function App()
+const secondaryApp = initializeApp(firebaseConfig, 'Secondary');
+const secondaryAuth = getAuth(secondaryApp);
+
 function App() {
   const [currentView, setCurrentView] = useState<ViewName>('catalog')
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
+  
   
   const {
     users,
@@ -98,8 +104,8 @@ function App() {
   // ✅ Admin actions
   const handleAddStudent = useCallback(async (student: User) => {
     try {
-      // 1. Create user in Firebase Authentication
-      const authResult = await createUserWithEmailAndPassword(auth, student.email!, student.password);
+      // 1. Create user using SECONDARY auth (keeps admin logged in!)
+      const authResult = await createUserWithEmailAndPassword(secondaryAuth, student.email!, student.password);
       
       // 2. Update student object with the real Firebase UID
       const studentWithAuthUid = { 
@@ -109,7 +115,9 @@ function App() {
       
       // 3. Save to Firestore
       await addUser(studentWithAuthUid);
-      refresh();
+      
+      // 4. Refresh data so they appear in the dashboard immediately
+      await refresh();
     } catch (err: any) {
       console.error('Failed to create student:', err);
       if (err.code === 'auth/email-already-in-use') {
@@ -117,19 +125,20 @@ function App() {
       } else {
         alert('Error creating student. Check console for details.');
       }
+      throw err; // Throw error so AdminDashboard knows it failed
     }
   }, [addUser, refresh]);
 
   // ✅ Add Admin function
-  const handleAddAdmin = useCallback(async (admin: User) => {
+   const handleAddAdmin = useCallback(async (admin: User) => {
     try {
-      const authResult = await createUserWithEmailAndPassword(auth, admin.email!, admin.password);
+      const authResult = await createUserWithEmailAndPassword(secondaryAuth, admin.email!, admin.password);
       const adminWithAuthUid = { 
         ...admin, 
         uid: authResult.user.uid 
       };
       await addUser(adminWithAuthUid);
-      refresh();
+      await refresh();
     } catch (err: any) {
       console.error('Failed to create admin:', err);
       if (err.code === 'auth/email-already-in-use') {
@@ -137,6 +146,7 @@ function App() {
       } else {
         alert('Error creating admin. Check console for details.');
       }
+      throw err;
     }
   }, [addUser, refresh]);
 

@@ -2,7 +2,7 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyAROc3TUVMLIbvfg0zsKkJKGdGDGYOC2sc", // ← Must match Firebase EXACTLY
   authDomain: "tafetas-3ac45.firebaseapp.com",
   projectId: "tafetas-3ac45",
@@ -13,6 +13,5 @@ const firebaseConfig = {
 };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-
 export const db = getFirestore(app);
 export const auth = getAuth(app);
