@@ -239,7 +239,6 @@ export function BookingView({
     setConfirmedBooking(null);
   };
 
-  const minDate = new Date().toISOString().split('T')[0];
 
   const steps = [
     { label: 'Service', done: selectedServiceId !== 'all' },
@@ -462,7 +461,7 @@ export function BookingView({
             )}
           </div>
         )}
-        
+
         {/* Time Slots */}
         {selectedDate && (
           <div className="mb-6 animate-in fade-in slide-in-from-bottom-2">

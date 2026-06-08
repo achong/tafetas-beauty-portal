@@ -1,12 +1,12 @@
 // src/App.tsx
 import { useState, useCallback, useEffect } from 'react'
-import { initializeApp } from 'firebase/app'
-import { onAuthStateChanged, signOut, User as FirebaseUser, createUserWithEmailAndPassword } from 'firebase/auth'
+import { initializeApp } from 'firebase/app' // ✅ Added for secondary auth
+import { onAuthStateChanged, signOut, User as FirebaseUser, createUserWithEmailAndPassword, getAuth } from 'firebase/auth' // ✅ Added getAuth
 import { doc, getDoc } from 'firebase/firestore'
 import './App.css'
 
 // Firebase
-import { auth, db } from '@/lib/firebase'
+import { auth, db, firebaseConfig } from '@/lib/firebase' // ✅ Added firebaseConfig
 
 // Sections
 import { Navbar } from '@/sections/Navbar'
@@ -21,7 +21,7 @@ import { StudentDashboard } from '@/sections/StudentDashboard'
 import { useClinicData, resetAllData } from '@/hooks/useClinicData'
 import type { User, ViewName, Booking, ScheduleEntry } from '@/types'
 
-function App()
+// ✅ CREATE SECONDARY AUTH INSTANCE HERE (Outside the component)
 const secondaryApp = initializeApp(firebaseConfig, 'Secondary');
 const secondaryAuth = getAuth(secondaryApp);
 
@@ -29,7 +29,6 @@ function App() {
   const [currentView, setCurrentView] = useState<ViewName>('catalog')
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
-  
   
   const {
     users,
@@ -49,13 +48,11 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
-        // Fetch user document from Firestore
         try {
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid))
           if (userDoc.exists()) {
             setCurrentUser(userDoc.data() as User)
           } else {
-            // User document doesn't exist - sign out
             await signOut(auth)
             setCurrentUser(null)
           }
@@ -89,7 +86,6 @@ function App() {
 
   // Navigation
   const handleSwitchView = useCallback((view: ViewName) => {
-    // Prevent navigation to protected routes if not authenticated
     if (view === 'admin-dashboard' && currentUser?.role !== 'admin') {
       setCurrentView('admin-login')
       return
@@ -101,22 +97,15 @@ function App() {
     setCurrentView(view)
   }, [currentUser])
 
-  // ✅ Admin actions
+  // ✅ Admin actions (Using secondaryAuth to prevent admin logout!)
   const handleAddStudent = useCallback(async (student: User) => {
     try {
-      // 1. Create user using SECONDARY auth (keeps admin logged in!)
       const authResult = await createUserWithEmailAndPassword(secondaryAuth, student.email!, student.password);
-      
-      // 2. Update student object with the real Firebase UID
       const studentWithAuthUid = { 
         ...student, 
         uid: authResult.user.uid 
       };
-      
-      // 3. Save to Firestore
       await addUser(studentWithAuthUid);
-      
-      // 4. Refresh data so they appear in the dashboard immediately
       await refresh();
     } catch (err: any) {
       console.error('Failed to create student:', err);
@@ -125,12 +114,11 @@ function App() {
       } else {
         alert('Error creating student. Check console for details.');
       }
-      throw err; // Throw error so AdminDashboard knows it failed
+      throw err; 
     }
   }, [addUser, refresh]);
 
-  // ✅ Add Admin function
-   const handleAddAdmin = useCallback(async (admin: User) => {
+  const handleAddAdmin = useCallback(async (admin: User) => {
     try {
       const authResult = await createUserWithEmailAndPassword(secondaryAuth, admin.email!, admin.password);
       const adminWithAuthUid = { 
@@ -168,13 +156,11 @@ function App() {
     refresh();
   }, [setSchedule, refresh]);
 
-  // Booking
   const handleBook = useCallback((booking: Booking) => {
     addBooking(booking);
     refresh();
   }, [addBooking, refresh]);
 
-  // Reset
   const handleResetData = useCallback(() => {
     resetAllData();
     setCurrentUser(null);
@@ -183,7 +169,6 @@ function App() {
     window.location.reload();
   }, [refresh]);
 
-  // Show loading state while checking auth
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -192,7 +177,6 @@ function App() {
     )
   }
 
-  // View renderer
   const renderView = () => {
     switch (currentView) {
       case 'catalog':
@@ -242,10 +226,7 @@ function App() {
             onUpdateUser={handleUpdateUser}
           />
         ) : (
-          <AdminLogin
-            onLogin={handleLogin}
-            onSwitchView={handleSwitchView}
-          />
+          <AdminLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
         )
       
       case 'student-login':
@@ -275,10 +256,7 @@ function App() {
             onUpdateSchedule={handleUpdateSchedule}
           />
         ) : (
-          <StudentLogin
-            onLogin={handleLogin}
-            onSwitchView={handleSwitchView}
-          />
+          <StudentLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
         )
       
       default:
