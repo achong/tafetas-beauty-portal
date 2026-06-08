@@ -43,7 +43,7 @@ export interface Booking {
 }
 
 export interface ScheduleEntry {
-  id: string;
+  id?: string;
   date: string;
   time?: string; // Existing code uses time
   start_time?: string;
