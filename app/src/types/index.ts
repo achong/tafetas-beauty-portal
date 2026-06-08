@@ -1,62 +1,57 @@
+// src/types/index.ts
+
 export interface User {
   uid: string;
-  role: 'admin' | 'student';
+  role: 'admin' | 'student' | 'client'; // ✅ Updated to include 'client'
   name: string;
   username: string;
   email?: string;
   password: string;
   isTemp: boolean;
   services_active: string[];
+  client_profile?: ClientProfile;
 }
 
 export interface Service {
   service_id: string;
-  category: string;
   name: string;
+  duration: number;
   price: number;
-}
-
-export interface ScheduleEntry {
-  student_id: string;
-  date: string;
-  time: string;
-  is_open: boolean;
+  category: string;
+  description?: string;
 }
 
 export interface Booking {
-  id: number;
-  service: Service | null;
-  student: string | null;
-  date: string | null;
-  time: string | null;
-  client_name: string;
-  client_email: string;
-  client_phone: string;
-  student_id?: string;
+  id?: string;
+  booking_id?: string;
+  service_id: string;
+  client_uid: string;
+  student_uid?: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  notes?: string;
+  form_submissions?: string[];
 }
 
-export type ViewName =
-  | 'catalog'
-  | 'booking'
-  | 'admin-login'
-  | 'admin-dashboard'
-  | 'student-login'
+export interface ScheduleEntry {
+  id: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  available_students: string[];
+}
+
+export type ViewName = 
+  | 'catalog' 
+  | 'booking' 
+  | 'admin-login' 
+  | 'admin-dashboard' 
+  | 'student-login' 
   | 'student-dashboard';
 
-  // app/src/types/index.ts
-
-export interface User {
-  uid: string;
-  role: 'admin' | 'student' | 'client'; // ← Added 'client'
-  name: string;
-  username: string;
-  email?: string;
-  password: string;
-  isTemp: boolean;
-  services_active: string[];
-  client_profile?: ClientProfile; // ← Optional client data
-}
-
+// --- NEW FORM TYPES ---
 export interface Form {
   form_id: string;
   service_id: string;
@@ -105,5 +100,3 @@ export interface ClientProfile {
   created_at: string;
   updated_at: string;
 }
-
-// ... keep your existing Service, Booking, ScheduleEntry, ViewName interfaces below

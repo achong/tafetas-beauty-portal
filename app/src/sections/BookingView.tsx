@@ -7,14 +7,6 @@ import { FormRenderer } from '@/components/FormRenderer';
 import { SERVICE_FORMS } from '@/data/forms';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -22,7 +14,14 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import type { Service, User, Booking } from '@/types';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import type { Service, User, Booking, Form, FormResponse } from '@/types';
 import type { ScheduleEntry } from '@/types';
 
 // Defined directly to avoid import path issues
@@ -33,6 +32,7 @@ const CLINIC_TIME_SLOTS = [
 ];
 
 interface BookingViewProps {
+  currentUser: User | null;
   services: Service[];
   users: User[];
   schedule: ScheduleEntry[];
@@ -41,7 +41,15 @@ interface BookingViewProps {
   categories: Record<string, { name: string; price: number }[]>;
 }
 
-export function BookingView({ services, users, schedule, bookings, onBook, categories }: BookingViewProps) {
+export function BookingView({ 
+  currentUser,
+  services, 
+  users, 
+  schedule, 
+  bookings, 
+  onBook, 
+  categories 
+}: BookingViewProps) {
   // Use "all" instead of "" to comply with Radix UI Select requirements
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedServiceId, setSelectedServiceId] = useState('all');
@@ -53,9 +61,11 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
   const [clientPhone, setClientPhone] = useState('');
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
+  
+  // Form modal state
   const [showFormModal, setShowFormModal] = useState(false);
-  const [pendingBooking, setPendingBooking] = useState<any>(null);
-  const [activeForm, setActiveForm] = useState<any>(null);
+  const [pendingBooking, setPendingBooking] = useState<Booking | null>(null);
+  const [activeForm, setActiveForm] = useState<Form | null>(null);
 
   const categoryList = useMemo(() => {
     if (!categories) return [];
@@ -117,7 +127,7 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
 
   const handleCategoryChange = (val: string) => {
     setSelectedCategory(val);
-    setSelectedServiceId('all'); // Reset to "all"
+    setSelectedServiceId('all');
     setSelectedDate('');
     setSelectedTime('');
   };
@@ -137,8 +147,54 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
     setSelectedTime(t);
   };
 
+  // Helper function to actually save the booking
+  const saveBooking = async (bookingData: Booking) => {
+    try {
+      await addDoc(collection(db, 'bookings'), {
+        ...bookingData,
+        created_at: new Date().toISOString(),
+        status: 'pending'
+      });
+      
+      setConfirmedBooking(bookingData);
+      setShowConfirm(true);
+      setShowFormModal(false);
+      setPendingBooking(null);
+      setActiveForm(null);
+    } catch (error) {
+      console.error('Error saving booking:', error);
+      alert('Failed to save booking.');
+    }
+  };
+
+  // Handle form submission
+  const handleFormSubmit = async (responses: FormResponse[]) => {
+    if (!activeForm || !currentUser || !pendingBooking) return;
+
+    try {
+      // 1. Save the form submission to Firestore
+      await addDoc(collection(db, 'form_submissions'), {
+        form_id: activeForm.form_id,
+        client_uid: currentUser.uid,
+        client_name: currentUser.name,
+        booking_id: pendingBooking.id || 'pending',
+        responses,
+        submitted_at: new Date().toISOString(),
+        is_signed: true
+      });
+
+      // 2. Now that the form is saved, complete the booking
+      await saveBooking(pendingBooking);
+      
+    } catch (error) {
+      console.error('Error saving form:', error);
+      alert('Error saving paperwork. Please try again.');
+    }
+  };
+
   const handleConfirm = () => {
-    if (!clientName.trim() || !clientEmail.trim()) return;
+    if (!clientName.trim() || !clientEmail.trim() || !selectedService) return;
+    
     const booking: Booking = {
       id: Date.now(),
       service: selectedService,
@@ -150,66 +206,19 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
       client_phone: clientPhone.trim(),
       student_id: selectedStudentId,
     };
-   const handleBook = async (bookingData: any) => {
-    // 1. Check if there is a form for this specific service
-    const requiredForm = SERVICE_FORMS.find(f => f.service_id === bookingData.service_id);
 
-    if (requiredForm && currentUser?.role === 'client') {
-      // If a form exists and it's a client booking, pause and show the form
+    // Check if there is a form for this specific service
+    const requiredForm = SERVICE_FORMS.find(f => f.service_id === selectedService.service_id);
+
+    if (requiredForm && currentUser) {
+      // If a form exists and user is logged in, pause and show the form
       setActiveForm(requiredForm);
-      setPendingBooking(bookingData);
+      setPendingBooking(booking);
       setShowFormModal(true);
     } else {
-      // No form needed (or it's an admin/student booking), save directly
-      await saveBooking(bookingData);
+      // No form needed (or not logged in), save directly
+      saveBooking(booking);
     }
-  };
-
-  // Helper function to actually save the booking to Firestore
-  const saveBooking = async (bookingData: any) => {
-    try {
-      await addDoc(collection(db, 'bookings'), {
-        ...bookingData,
-        created_at: new Date().toISOString(),
-        status: 'pending'
-      });
-      alert('Booking confirmed successfully!');
-      // Add your refresh/clear logic here
-    } catch (error) {
-      console.error('Error saving booking:', error);
-      alert('Failed to save booking.');
-    }
-  };
-
-  // Helper function to save the completed form
-  const handleFormSubmit = async (responses: any[]) => {
-    if (!activeForm || !currentUser || !pendingBooking) return;
-
-    try {
-      // 1. Save the form submission to Firestore
-      await addDoc(collection(db, 'form_submissions'), {
-        form_id: activeForm.form_id,
-        client_uid: currentUser.uid,
-        client_name: currentUser.name,
-        booking_id: pendingBooking.id || 'pending', // Link to booking if it has an ID
-        responses,
-        submitted_at: new Date().toISOString(),
-        is_signed: true
-      });
-
-      // 2. Now that the form is saved, complete the booking
-      await saveBooking(pendingBooking);
-
-      // 3. Close the modal
-      setShowFormModal(false);
-      setPendingBooking(null);
-      setActiveForm(null);
-      
-    } catch (error) {
-      console.error('Error saving form:', error);
-      alert('Error saving paperwork. Please try again.');
-    }
-  };
   };
 
   const handleCloseConfirm = () => {
@@ -559,7 +568,7 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
         </DialogContent>
       </Dialog>
 
-            {/* Paperwork Modal */}
+      {/* Paperwork Modal */}
       <Dialog open={showFormModal} onOpenChange={setShowFormModal}>
         <DialogContent className="sm:max-w-3xl bg-card border-border text-foreground max-h-[90vh] overflow-y-auto">
           <DialogHeader>

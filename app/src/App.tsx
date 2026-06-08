@@ -191,6 +191,7 @@ function App() {
       case 'booking':
         return (
           <BookingView
+            currentUser={currentUser}
             services={services}
             users={users}
             schedule={schedule}
