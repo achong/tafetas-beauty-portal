@@ -161,14 +161,14 @@ export function BookingView({
 
   // Handle form submission
   const handleFormSubmit = async (responses: FormResponse[]) => {
-    if (!activeForm || !currentUser || !pendingBooking) return;
+    if (!activeForm || !pendingBooking) return;
 
     try {
       // 1. Save the form submission to Firestore
       await addDoc(collection(db, 'form_submissions'), {
         form_id: activeForm.form_id,
-        client_uid: currentUser.uid,
-        client_name: currentUser.name,
+        client_uid: currentUser?.uid || `guest_${Date.now()}`, // Use guest ID if not logged in
+        client_name: pendingBooking.client_name || currentUser?.name || 'Guest', // Use the name they typed in the booking form!
         booking_id: pendingBooking.id || 'pending',
         responses,
         submitted_at: new Date().toISOString(),
@@ -202,7 +202,7 @@ export function BookingView({
     // Check if there is a form for this specific service
     const requiredForm = SERVICE_FORMS.find(f => f.service_id === selectedService.service_id);
 
-    if (requiredForm && currentUser) {
+    if (requiredForm) {
       // If a form exists and user is logged in, pause and show the form
       setActiveForm(requiredForm);
       setPendingBooking(booking);
