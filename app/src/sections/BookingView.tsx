@@ -3,6 +3,11 @@ import { Check, User as UserIcon, Calendar, Clock, CreditCard, AlertCircle, Spar
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { FormRenderer } from '@/components/FormRenderer';
+import { SERVICE_FORMS } from '@/data/forms';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -48,6 +53,9 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
   const [clientPhone, setClientPhone] = useState('');
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [pendingBooking, setPendingBooking] = useState<any>(null);
+  const [activeForm, setActiveForm] = useState<any>(null);
 
   const categoryList = useMemo(() => {
     if (!categories) return [];
@@ -142,9 +150,66 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
       client_phone: clientPhone.trim(),
       student_id: selectedStudentId,
     };
-    onBook(booking);
-    setConfirmedBooking(booking);
-    setShowConfirm(true);
+   const handleBook = async (bookingData: any) => {
+    // 1. Check if there is a form for this specific service
+    const requiredForm = SERVICE_FORMS.find(f => f.service_id === bookingData.service_id);
+
+    if (requiredForm && currentUser?.role === 'client') {
+      // If a form exists and it's a client booking, pause and show the form
+      setActiveForm(requiredForm);
+      setPendingBooking(bookingData);
+      setShowFormModal(true);
+    } else {
+      // No form needed (or it's an admin/student booking), save directly
+      await saveBooking(bookingData);
+    }
+  };
+
+  // Helper function to actually save the booking to Firestore
+  const saveBooking = async (bookingData: any) => {
+    try {
+      await addDoc(collection(db, 'bookings'), {
+        ...bookingData,
+        created_at: new Date().toISOString(),
+        status: 'pending'
+      });
+      alert('Booking confirmed successfully!');
+      // Add your refresh/clear logic here
+    } catch (error) {
+      console.error('Error saving booking:', error);
+      alert('Failed to save booking.');
+    }
+  };
+
+  // Helper function to save the completed form
+  const handleFormSubmit = async (responses: any[]) => {
+    if (!activeForm || !currentUser || !pendingBooking) return;
+
+    try {
+      // 1. Save the form submission to Firestore
+      await addDoc(collection(db, 'form_submissions'), {
+        form_id: activeForm.form_id,
+        client_uid: currentUser.uid,
+        client_name: currentUser.name,
+        booking_id: pendingBooking.id || 'pending', // Link to booking if it has an ID
+        responses,
+        submitted_at: new Date().toISOString(),
+        is_signed: true
+      });
+
+      // 2. Now that the form is saved, complete the booking
+      await saveBooking(pendingBooking);
+
+      // 3. Close the modal
+      setShowFormModal(false);
+      setPendingBooking(null);
+      setActiveForm(null);
+      
+    } catch (error) {
+      console.error('Error saving form:', error);
+      alert('Error saving paperwork. Please try again.');
+    }
+  };
   };
 
   const handleCloseConfirm = () => {
@@ -491,6 +556,32 @@ export function BookingView({ services, users, schedule, bookings, onBook, categ
           >
             Done
           </Button>
+        </DialogContent>
+      </Dialog>
+
+            {/* Paperwork Modal */}
+      <Dialog open={showFormModal} onOpenChange={setShowFormModal}>
+        <DialogContent className="sm:max-w-3xl bg-card border-border text-foreground max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">Required Paperwork</DialogTitle>
+            <DialogDescription>
+              Please complete this form to proceed with your booking.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {activeForm && (
+            <div className="py-4">
+              <FormRenderer
+                form={activeForm}
+                onSubmit={handleFormSubmit}
+                onCancel={() => {
+                  setShowFormModal(false);
+                  setPendingBooking(null);
+                  setActiveForm(null);
+                }}
+              />
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
