@@ -148,23 +148,15 @@ export function BookingView({
   };
 
   // Helper function to actually save the booking
-  const saveBooking = async (bookingData: Booking) => {
-    try {
-      await addDoc(collection(db, 'bookings'), {
-        ...bookingData,
-        created_at: new Date().toISOString(),
-        status: 'pending'
-      });
-      
-      setConfirmedBooking(bookingData);
-      setShowConfirm(true);
-      setShowFormModal(false);
-      setPendingBooking(null);
-      setActiveForm(null);
-    } catch (error) {
-      console.error('Error saving booking:', error);
-      alert('Failed to save booking.');
-    }
+  const saveBooking = (bookingData: Booking) => {
+    // Call the onBook prop passed from App.tsx (which handles Firestore + local state)
+    onBook(bookingData);
+    
+    setConfirmedBooking(bookingData);
+    setShowConfirm(true);
+    setShowFormModal(false);
+    setPendingBooking(null);
+    setActiveForm(null);
   };
 
   // Handle form submission

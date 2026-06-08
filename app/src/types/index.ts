@@ -2,7 +2,7 @@
 
 export interface User {
   uid: string;
-  role: 'admin' | 'student' | 'client'; // ✅ Updated to include 'client'
+  role: 'admin' | 'student' | 'client'; // Added 'client'
   name: string;
   username: string;
   email?: string;
@@ -15,22 +15,29 @@ export interface User {
 export interface Service {
   service_id: string;
   name: string;
-  duration: number;
+  duration?: number; // Made optional to fix useClinicData error
   price: number;
   category: string;
   description?: string;
 }
 
 export interface Booking {
-  id?: string;
+  id?: number | string;
   booking_id?: string;
-  service_id: string;
-  client_uid: string;
+  service?: any; // Existing code passes the whole service object
+  service_id?: string;
+  student?: string;
+  student_id?: string; // Existing code uses student_id
   student_uid?: string;
   date: string;
-  start_time: string;
-  end_time: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  time?: string; // Existing code uses time
+  start_time?: string;
+  end_time?: string;
+  client_name?: string;
+  client_email?: string;
+  client_phone?: string;
+  client_uid?: string;
+  status?: string;
   notes?: string;
   form_submissions?: string[];
 }
@@ -38,9 +45,12 @@ export interface Booking {
 export interface ScheduleEntry {
   id: string;
   date: string;
-  start_time: string;
-  end_time: string;
-  available_students: string[];
+  time?: string; // Existing code uses time
+  start_time?: string;
+  end_time?: string;
+  student_id?: string; // Existing code uses student_id
+  is_open?: boolean; // Existing code uses is_open
+  available_students?: string[];
 }
 
 export type ViewName = 
@@ -73,7 +83,7 @@ export interface FormField {
 }
 
 export interface FormSubmission {
-  submission_id: string;
+  submission_id?: string;
   form_id: string;
   client_uid: string;
   booking_id?: string;
