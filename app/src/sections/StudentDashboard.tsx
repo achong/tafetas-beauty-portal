@@ -98,7 +98,6 @@ export function StudentDashboard({
       }
 
       // 2. Send Cancellation Email via EmailJS
-      // ⚠️ REPLACE THESE WITH YOUR ACTUAL EMAILJS IDs!
       const templateParams = {
         client_name: booking.client_name || 'Valued Client',
         service_name: booking.service?.name || 'Salon Service',
@@ -108,10 +107,10 @@ export function StudentDashboard({
       };
 
       await emailjs.send(
-        'YOUR_SERVICE_ID_HERE',          // ← Paste your Service ID here
-        'YOUR_CANCELLED_TEMPLATE_ID',    // ← Paste your Cancelled Template ID here
+        'service_4qnx88c',          // ✅ Your Service ID
+        'template_iw9q39l',         // ✅ Your Appt Cancelled Template ID
         templateParams,
-        'YOUR_PUBLIC_KEY_HERE'           // ← Paste your Public Key here
+        'rVWHR3b4DfTP9T7om'         // ✅ Your Public Key
       );
 
       alert('Appointment cancelled and client notified.');
