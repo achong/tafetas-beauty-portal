@@ -7,6 +7,7 @@ import { FormRenderer } from '@/components/FormRenderer';
 import { SERVICE_FORMS } from '@/data/forms';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import emailjs from '@emailjs/browser';
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,7 @@ import {
 } from '@/components/ui/select';
 import type { Service, User, Booking, Form, FormResponse } from '@/types';
 import type { ScheduleEntry } from '@/types';
+
 
 // Defined directly to avoid import path issues
 const CLINIC_TIME_SLOTS = [
@@ -161,15 +163,42 @@ export function BookingView({
   };
 
   // Helper function to actually save the booking
-  const saveBooking = (bookingData: Booking) => {
-    // Call the onBook prop passed from App.tsx (which handles Firestore + local state)
-    onBook(bookingData);
-    
-    setConfirmedBooking(bookingData);
-    setShowConfirm(true);
-    setShowFormModal(false);
-    setPendingBooking(null);
-    setActiveForm(null);
+  const saveBooking = async (bookingData: Booking) => {
+    try {
+      // 1. Save to Firebase
+      await addDoc(collection(db, 'bookings'), {
+        ...bookingData,
+        created_at: new Date().toISOString(),
+        status: 'confirmed'
+      });
+
+      // 2. Send Confirmation Email via EmailJS
+      // ⚠️ REPLACE THE 4 ITEMS BELOW WITH YOUR ACTUAL EMAILJS IDs!
+      const templateParams = {
+        client_name: bookingData.client_name || 'Valued Client',
+        service_name: bookingData.service?.name || 'Salon Service',
+        booking_date: bookingData.date,
+        booking_time: bookingData.time,
+        student_name: users.find(u => u.uid === bookingData.student_id)?.name || 'Student Stylist',
+        to_email: bookingData.client_email, 
+      };
+
+      await emailjs.send(
+        service_4qnx88c
+        template_bz1r1nh
+        templateParams,
+        rVWHR3b4DfTP9T7om
+      );
+      
+      setConfirmedBooking(bookingData);
+      setShowConfirm(true);
+      setShowFormModal(false);
+      setPendingBooking(null);
+      setActiveForm(null);
+    } catch (error) {
+      console.error('Error saving booking or sending email:', error);
+      alert('Booking saved, but there was an issue sending the confirmation email.');
+    }
   };
 
   // Handle form submission

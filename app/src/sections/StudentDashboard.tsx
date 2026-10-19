@@ -7,6 +7,8 @@ import {
   Sparkles,
   Check,
   X,
+  Calendar,
+  XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +25,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { User, Service, ScheduleEntry, Booking } from '@/types';
 import { CLINIC_TIME_SLOTS } from '@/hooks/useClinicData';
+import { db } from '@/lib/firebase';
+import { updateDoc, doc } from 'firebase/firestore';
+import emailjs from '@emailjs/browser';
 
 interface StudentDashboardProps {
   currentUser: User;
@@ -77,6 +82,45 @@ export function StudentDashboard({
     () => bookings.filter((b) => b.student_id === currentUser.uid),
     [bookings, currentUser.uid]
   );
+
+  // ✅ NEW: Function to cancel a booking and send email
+  const handleCancelBooking = async (booking: Booking) => {
+    if (!confirm(`Are you sure you want to cancel the appointment with ${booking.client_name} on ${booking.date} at ${booking.time}? This will send them a cancellation email.`)) {
+      return;
+    }
+
+    try {
+      // 1. Update status in Firebase
+      if (booking.id) {
+        await updateDoc(doc(db, 'bookings', booking.id.toString()), {
+          status: 'cancelled_by_student'
+        });
+      }
+
+      // 2. Send Cancellation Email via EmailJS
+      // ⚠️ REPLACE THESE WITH YOUR ACTUAL EMAILJS IDs!
+      const templateParams = {
+        client_name: booking.client_name || 'Valued Client',
+        service_name: booking.service?.name || 'Salon Service',
+        booking_date: booking.date,
+        booking_time: booking.time,
+        to_email: booking.client_email,
+      };
+
+      await emailjs.send(
+        'YOUR_SERVICE_ID_HERE',          // ← Paste your Service ID here
+        'YOUR_CANCELLED_TEMPLATE_ID',    // ← Paste your Cancelled Template ID here
+        templateParams,
+        'YOUR_PUBLIC_KEY_HERE'           // ← Paste your Public Key here
+      );
+
+      alert('Appointment cancelled and client notified.');
+      window.location.reload(); // Refresh page to update the list
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      alert('Failed to cancel appointment. Please try again.');
+    }
+  };
 
   const changeMonth = (delta: number) => {
     let newMonth = calendarMonth + delta;
@@ -200,6 +244,11 @@ export function StudentDashboard({
     alert('Password updated successfully');
   };
 
+  // Filter out cancelled bookings and past dates for the list
+  const upcomingBookings = bookingsForUser.filter(
+    (b) => b.status !== 'cancelled_by_student' && b.date >= new Date().toISOString().split('T')[0]
+  );
+
   return (
     <div className="fade-in space-y-6">
       {/* Welcome Header */}
@@ -209,7 +258,7 @@ export function StudentDashboard({
             Welcome, {currentUser.name}!
           </h2>
           <p className="text-muted-foreground text-sm mt-0.5">
-            Manage your services and availability
+            Manage your services, availability, and appointments
           </p>
         </div>
         {currentUser.isTemp && (
@@ -442,6 +491,57 @@ export function StudentDashboard({
           </CardContent>
         </Card>
       </div>
+
+      {/* ✅ NEW: Upcoming Appointments Section */}
+      <Card className="bg-card border-border text-card-foreground">
+        <CardHeader className="border-b border-border bg-card">
+          <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-primary" />
+            Upcoming Appointments
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {upcomingBookings.length === 0 ? (
+            <p className="text-muted-foreground text-sm py-8 text-center">
+              You have no upcoming appointments scheduled.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {upcomingBookings.map((booking) => (
+                <div 
+                  key={booking.id} 
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-border rounded-xl bg-muted/20 gap-4"
+                >
+                  <div>
+                    <p className="font-semibold text-foreground text-lg">
+                      {booking.client_name}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-medium text-primary">
+                        {booking.service?.name || 'Salon Service'}
+                      </span>
+                      {' • '}
+                      {booking.date} at {booking.time}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Contact: {booking.client_email}
+                    </p>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleCancelBooking(booking)}
+                    className="w-full sm:w-auto bg-red-600 hover:bg-red-700"
+                  >
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Cancel Appointment
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Change Password Modal */}
       <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
