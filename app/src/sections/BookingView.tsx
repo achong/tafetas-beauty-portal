@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/select';
 import type { Service, User, Booking, Form, FormResponse } from '@/types';
 import type { ScheduleEntry } from '@/types';
-import emailjs from '@emailjs/browser';
+
 
 const CLINIC_TIME_SLOTS = [
   '9:00', '9:30', '10:00', '10:30', '11:00', '11:30',
