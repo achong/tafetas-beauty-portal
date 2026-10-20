@@ -522,7 +522,7 @@ export function AdminDashboard({
               Create a new student account. They will log in with their email address.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 pt-2">
+           <div className="space-y-4 pt-2">
             <div>
               <Label className="text-sm text-foreground mb-1 block">First Name</Label>
               <Input
@@ -535,23 +535,23 @@ export function AdminDashboard({
               />
             </div>
             <div>
-              <Label className="text-sm text-foreground mb-1 block">Email Address</Label>
-              <Input
-                type="email"
-                value={studentEmail}
-                onChange={(e) => setStudentEmail(e.target.value)}
-                placeholder="student@example.com"
-                className="bg-background border-border text-foreground placeholder:text-muted-foreground"
-                onKeyDown={(e) => e.key === 'Enter' && handleAddStudent()}
-              />
-            </div>
-            <div>
               <Label className="text-sm text-foreground mb-1 block">Last Name</Label>
               <Input
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Last Name"
+                className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                onKeyDown={(e) => e.key === 'Enter' && handleAddStudent()}
+              />
+            </div>
+            <div>
+              <Label className="text-sm text-foreground mb-1 block">Email Address</Label>
+              <Input
+                type="email"
+                value={studentEmail}
+                onChange={(e) => setStudentEmail(e.target.value)}
+                placeholder="student@example.com"
                 className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                 onKeyDown={(e) => e.key === 'Enter' && handleAddStudent()}
               />
