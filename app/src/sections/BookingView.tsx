@@ -156,14 +156,10 @@ export function BookingView({
 
   const saveBooking = async (bookingData: Booking) => {
     try {
-      // 1. Save to Firebase
-      await addDoc(collection(db, 'bookings'), {
-        ...bookingData,
-        created_at: new Date().toISOString(),
-        status: 'confirmed'
-      });
+      // ✅ Use the onBook prop to update local state AND save to Firestore via App.tsx
+      onBook(bookingData); 
 
-      // 2. Send Confirmation Email via EmailJS
+      // Send Confirmation Email via EmailJS
       const templateParams = {
         client_name: bookingData.client_name || 'Valued Client',
         service_name: bookingData.service?.name || 'Salon Service',
@@ -174,10 +170,10 @@ export function BookingView({
       };
 
       await emailjs.send(
-        'service_4qnx88c',       // ✅ Your Service ID
-        'template_bz1r1nh',      // ✅ Your Order Confirmation Template ID
+        'service_4qnx88c',       
+        'template_bz1r1nh',      
         templateParams,
-        'rVWHR3b4DfTP9T7om'      // ✅ Your Public Key
+        'rVWHR3b4DfTP9T7om'      
       );
       
       setConfirmedBooking(bookingData);
@@ -190,6 +186,7 @@ export function BookingView({
       alert('Booking saved, but there was an issue sending the confirmation email.');
     }
   };
+  
 
   const handleFormSubmit = async (responses: FormResponse[]) => {
     if (!activeForm || !pendingBooking) return;
