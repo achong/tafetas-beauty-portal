@@ -27,7 +27,7 @@ import type { User, Service, ScheduleEntry, Booking } from '@/types';
 import { CLINIC_TIME_SLOTS } from '@/hooks/useClinicData';
 import { db } from '@/lib/firebase';
 import { updateDoc, doc } from 'firebase/firestore';
-import emailjs from '@emailjs/browser';
+
 
 interface StudentDashboardProps {
   currentUser: User;
@@ -97,7 +97,7 @@ export function StudentDashboard({
         });
       }
 
-      // 2. Send Cancellation Email via EmailJS
+      // 2. Prepare email data
       const templateParams = {
         client_name: booking.client_name || 'Valued Client',
         service_name: booking.service?.name || 'Salon Service',
@@ -106,15 +106,20 @@ export function StudentDashboard({
         to_email: booking.client_email,
       };
 
-      await emailjs.send(
-        'service_4qnx88c',          // ✅ Your Service ID
-        'template_iw9q39l',         // ✅ Your Appt Cancelled Template ID
-        templateParams,
-        'rVWHR3b4DfTP9T7om'         // ✅ Your Public Key
-      );
+      // 3. Send Cancellation Email using native fetch
+      await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_id: 'service_4qnx88c',
+          template_id: 'template_iw9q39l',
+          user_id: 'rVWHR3b4DfTP9T7om', // Your Public Key
+          template_params: templateParams,
+        }),
+      });
 
       alert('Appointment cancelled and client notified.');
-      window.location.reload(); // Refresh page to update the list
+      window.location.reload();
     } catch (error) {
       console.error('Error cancelling booking:', error);
       alert('Failed to cancel appointment. Please try again.');
