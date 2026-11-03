@@ -70,7 +70,6 @@ export function ServicesCatalog({ categories }: ServicesCatalogProps) {
 {/* TasTAFE Study Calendar (Auto-updates year) */}
 <div className="mt-12 mb-8 bg-primary/5 border border-primary/20 rounded-2xl p-6 md:p-8">
   {(() => {
-    // Automatically determine the year based on the current date
     const currentYear = new Date().getFullYear();
     const is2027 = currentYear >= 2027;
     const year = is2027 ? 2027 : 2026;
@@ -143,7 +142,6 @@ export function ServicesCatalog({ categories }: ServicesCatalogProps) {
     );
   })()}
 </div>
-
 
 
       {/* CTA Section */}
