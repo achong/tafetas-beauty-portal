@@ -76,6 +76,9 @@ export function BookingView({
     return services.filter((s) => s.category === selectedCategory);
   }, [selectedCategory, services]);
 
+   console.log("ALL services from Firebase:", services);
+  console.log("Selected Category:", selectedCategory, "Filtered:", filteredServices);
+
   const selectedService = useMemo(
     () => selectedServiceId === 'all' ? null : (services?.find((s) => s.service_id === selectedServiceId) || null),
     [selectedServiceId, services]
