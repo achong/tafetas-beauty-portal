@@ -56,6 +56,13 @@ export const SERVICE_CATEGORIES: Record<string, { name: string; price: number }[
     { name: 'Lashes strip or clusters', price: 5 },
     { name: 'Spray tan service (Full Body)', price: 10 },
   ],
+
+    'Hairdressing': [
+    { name: 'Hair Consultation', price: 0 },
+    { name: 'Hair Cut & Style', price: 25 },
+    { name: 'Chemical Reformation (Perm/Straightening)', price: 50 },
+    { name: 'Hair Colour Service', price: 40 },
+  ],
 };
 
 export const CLINIC_TIME_SLOTS = [
