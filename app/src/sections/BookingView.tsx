@@ -70,10 +70,14 @@ export function BookingView({
     return Object.keys(categories);
   }, [categories]);
 
-  const filteredServices = useMemo(() => {
+    const filteredServices = useMemo(() => {
     if (!services) return [];
     if (selectedCategory === 'all') return services;
-    return services.filter((s) => s.category === selectedCategory);
+    
+    // Robust filter: trims whitespace and ignores case
+    return services.filter((s) => 
+      s.category?.trim().toLowerCase() === selectedCategory.trim().toLowerCase()
+    );
   }, [selectedCategory, services]);
 
    console.log("ALL services from Firebase:", services);
