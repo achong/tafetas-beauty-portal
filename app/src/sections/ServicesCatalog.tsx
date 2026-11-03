@@ -1,4 +1,4 @@
-import { Sparkles, Scissors, Droplets, Sparkle } from 'lucide-react';
+import { Calendar, Sparkles, Scissors, Droplets, Sparkle } from 'lucide-react';
 
 interface ServiceItem {
   name: string;
@@ -64,6 +64,68 @@ export function ServicesCatalog({ categories }: ServicesCatalogProps) {
           </div>
         ))}
       </div>
+
+{/* TasTAFE 2027 Study Calendar */}
+<div className="mb-8 bg-primary/5 border border-primary/20 rounded-2xl p-6 md:p-8">
+  <div className="flex items-start gap-4">
+    <div className="p-3 bg-primary/10 rounded-xl shrink-0">
+      <Calendar className="w-6 h-6 text-primary" />
+    </div>
+    <div className="flex-1">
+      <h3 className="text-xl font-bold text-foreground mb-4">
+        TasTAFE 2027 Study Calendar
+      </h3>
+      <p className="text-sm text-muted-foreground mb-4">
+        Our student clinic operates during TasTAFE semester periods. 
+        Clinic availability may vary during breaks and public holidays.
+      </p>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Intake 1 */}
+        <div className="bg-background border border-border rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 rounded-full bg-green-500" />
+            <span className="font-semibold text-foreground">Intake 1</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">Starts:</span> Monday, 1 February 2027
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">Finishes:</span> Friday, 2 July 2027
+          </p>
+        </div>
+
+        {/* Intake 2 */}
+        <div className="bg-background border border-border rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 rounded-full bg-blue-500" />
+            <span className="font-semibold text-foreground">Intake 2</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">Starts:</span> Monday, 19 July 2027
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">Finishes:</span> Friday, 10 December 2027
+          </p>
+        </div>
+      </div>
+      
+      <p className="text-xs text-muted-foreground mt-4 italic">
+        * For more information, visit the{' '}
+        <a 
+          href="https://www.tastafe.tas.edu.au/students/learning/study-calendar" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-primary hover:underline"
+        >
+          official TasTAFE Study Calendar
+        </a>.
+      </p>
+    </div>
+  </div>
+</div>
+
+
 
       {/* CTA Section */}
       <div className="mt-12 bg-card border border-border rounded-2xl p-8 md:p-12 text-center">
