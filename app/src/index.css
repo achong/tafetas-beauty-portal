@@ -72,3 +72,10 @@
 .border-gray-200 {
   border-color: hsl(var(--border)) !important;
 }
+
+
+   /* Force the Book Now button to be orange */
+   a[style*="background-color"],
+   div[style*="background-color"] {
+     background-color: #F26522 !important;
+   }
