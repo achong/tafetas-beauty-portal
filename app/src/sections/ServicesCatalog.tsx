@@ -144,23 +144,24 @@ export function ServicesCatalog({ categories, onBookNow }: ServicesCatalogProps)
       </div>
 
       {/* CTA Section */}
-      <div className="mt-12 bg-card border border-border rounded-2xl p-8 md:p-12 text-center">
-        <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-          Ready to Book Your Appointment?
-        </h3>
-        <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-          Take the first step towards looking and feeling your best. Our talented students are ready to provide you with exceptional service.
-        </p>
-        <Button
-  onClick={onBookNow}
-  className="mx-auto my-6 bg-[#F26522] hover:bg-[#F26522]/90 text-white px-8 py-3 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
->
-  Book Now
-</Button>
-        <p className="text-[#F26522] font-semibold">
-          Professional Training • Affordable Prices • Quality Results
-        </p>
-      </div>
-    </div>
+<div className="mt-12 bg-card border border-border rounded-2xl p-8 md:p-12 text-center">
+  <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
+    Ready to Book Your Appointment?
+  </h3>
+  <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+    Take the first step towards looking and feeling your best. Our talented students are ready to provide you with exceptional service.
+  </p>
+  
+  <button
+    onClick={onBookNow}
+    className="mx-auto my-6 inline-block bg-[#F26522] hover:bg-[#d95a1a] text-white px-8 py-3 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all cursor-pointer"
+  >
+    Book Now
+  </button>
+  
+  <p className="text-[#F26522] font-semibold">
+    Professional Training • Affordable Prices • Quality Results
+  </p>
+</div>
   );
 }
