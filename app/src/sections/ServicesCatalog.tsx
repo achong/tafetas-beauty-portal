@@ -1,5 +1,4 @@
 import { Calendar, Sparkles, Scissors, Droplets, Sparkle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 interface ServiceItem {
   name: string;
