@@ -180,7 +180,9 @@ function App() {
   const renderView = () => {
     switch (currentView) {
       case 'catalog':
-        return <ServicesCatalog categories={SERVICE_CATEGORIES} />
+        return <ServicesCatalog categories={SERVICE_CATEGORIES} 
+        onBookNow={() => handleSwitchView('booking')} 
+        />
       
       case 'booking':
         return (

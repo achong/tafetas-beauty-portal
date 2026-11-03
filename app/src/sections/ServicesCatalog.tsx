@@ -7,6 +7,7 @@ interface ServiceItem {
 
 interface ServicesCatalogProps {
   categories: Record<string, ServiceItem[]>;
+  onBookNow?: () => void; // ✅ ADD THIS LINE
 }
 
 const categoryIcons: Record<string, React.ReactNode> = {
@@ -150,10 +151,16 @@ export function ServicesCatalog({ categories }: ServicesCatalogProps) {
         <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
           Ready to Book Your Appointment?
         </h3>
+           export function ServicesCatalog({ categories, onBookNow }: ServicesCatalogProps) {
         <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
           Take the first step towards looking and feeling your best. Our talented students are ready to provide you with exceptional service.
         </p>
-        <div className="h-1 w-24 mx-auto mb-6 bg-gradient-to-r from-[#F26522] to-[#E55A1A] rounded-full" />
+           <Button
+     onClick={onBookNow}
+     className="mx-auto my-6 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+   >
+     Book Now
+   </Button>
         <p className="text-[#F26522] font-semibold">
           Professional Training • Affordable Prices • Quality Results
         </p>
