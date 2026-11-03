@@ -152,11 +152,11 @@ export function ServicesCatalog({ categories, onBookNow }: ServicesCatalogProps)
           Take the first step towards looking and feeling your best. Our talented students are ready to provide you with exceptional service.
         </p>
         <Button
-          onClick={onBookNow}
-          className="mx-auto my-6 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
-        >
-          Book Now
-        </Button>
+  onClick={onBookNow}
+  className="mx-auto my-6 bg-[#F26522] hover:bg-[#F26522]/90 text-white px-8 py-3 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+>
+  Book Now
+</Button>
         <p className="text-[#F26522] font-semibold">
           Professional Training • Affordable Prices • Quality Results
         </p>
