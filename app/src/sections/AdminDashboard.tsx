@@ -44,7 +44,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import Papa from 'papaparse';
+import Papa, { ParseResult } from 'papaparse';
 import type { User, Service, Booking } from '@/types';
 
 interface AdminDashboardProps {
@@ -81,31 +81,20 @@ export function AdminDashboard({
   const [studentEmail, setStudentEmail] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
-  const [generatedCreds, setGeneratedCreds] = useState<{
-    username: string;
-    password: string;
-  } | null>(null);
+  const [generatedCreds, setGeneratedCreds] = useState<{ username: string; password: string } | null>(null);
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Bulk upload state
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [bulkFile, setBulkFile] = useState<File | null>(null);
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0, status: '' });
   const [isBulkUploading, setIsBulkUploading] = useState(false);
   const [bulkResults, setBulkResults] = useState<{success: number, failed: number, errors: string[]} | null>(null);
 
-  const students = useMemo(
-    () => users.filter((u) => u.role === 'student'),
-    [users]
-  );
-
-  const admins = useMemo(
-    () => users.filter((u) => u.role === 'admin'),
-    [users]
-  );
+  const students = useMemo(() => users.filter((u) => u.role === 'student'), [users]);
+  const admins = useMemo(() => users.filter((u) => u.role === 'admin'), [users]);
 
   const stats = [
     { label: 'Total Students', value: students.length, icon: Users },
@@ -114,14 +103,8 @@ export function AdminDashboard({
   ];
 
   const handleChangePassword = () => {
-    if (!newPassword || newPassword.length < 6) {
-      alert('Password must be at least 6 characters');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      alert('Passwords do not match');
-      return;
-    }
+    if (!newPassword || newPassword.length < 6) { alert('Password must be at least 6 characters'); return; }
+    if (newPassword !== confirmPassword) { alert('Passwords do not match'); return; }
     onUpdateUser({ ...currentUser, password: newPassword, isTemp: false });
     setShowPasswordModal(false);
     setNewPassword('');
@@ -214,7 +197,7 @@ export function AdminDashboard({
     Papa.parse(bulkFile, {
       header: true,
       skipEmptyLines: true,
-      complete: async (results) => {
+      complete: async (results: ParseResult<any>) => {
         const studentsData = results.data as any[];
         if (studentsData.length === 0) {
           alert('CSV file is empty or invalid.');
@@ -244,7 +227,7 @@ export function AdminDashboard({
           setIsBulkUploading(false);
         }
       },
-      error: (err) => {
+      error: (err: Error) => {
         alert('Error parsing CSV: ' + err.message);
         setIsBulkUploading(false);
       }

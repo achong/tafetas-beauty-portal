@@ -1,12 +1,12 @@
-// src/App.tsx
+// app/src/App.tsx
 import { useState, useCallback, useEffect } from 'react'
-import { initializeApp } from 'firebase/app' // ✅ Added for secondary auth
-import { onAuthStateChanged, signOut, User as FirebaseUser, createUserWithEmailAndPassword, getAuth } from 'firebase/auth' // ✅ Added getAuth
+import { initializeApp } from 'firebase/app'
+import { onAuthStateChanged, signOut, User as FirebaseUser, createUserWithEmailAndPassword, getAuth, sendPasswordResetEmail } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 import './App.css'
 
 // Firebase
-import { auth, db, firebaseConfig } from '@/lib/firebase' // ✅ Added firebaseConfig
+import { auth, db, firebaseConfig } from '@/lib/firebase'
 
 // Sections
 import { Navbar } from '@/sections/Navbar'
@@ -20,11 +20,6 @@ import { StudentDashboard } from '@/sections/StudentDashboard'
 // Hooks & Types
 import { useClinicData, resetAllData } from '@/hooks/useClinicData'
 import type { User, ViewName, Booking, ScheduleEntry } from '@/types'
-
-//import { getAuth } from 'firebase/auth' // ✅ added for bulk user creation
-   import { initializeApp } from 'firebase/app';
-   import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
-   import { firebaseConfig } from '@/lib/firebase'; // Make sure this is exported from your firebase.ts file
 
 // ✅ CREATE SECONDARY AUTH INSTANCE HERE (Outside the component)
 const secondaryApp = initializeApp(firebaseConfig, 'Secondary');
@@ -49,7 +44,6 @@ function App() {
     SERVICE_CATEGORIES,
   } = useClinicData()
 
-  // Listen for Firebase auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
@@ -74,7 +68,6 @@ function App() {
     return () => unsubscribe()
   }, [])
 
-  // Auth handlers
   const handleLogin = useCallback((user: User) => {
     setCurrentUser(user)
   }, [])
@@ -89,7 +82,6 @@ function App() {
     setCurrentView('catalog')
   }, [])
 
-  // Navigation
   const handleSwitchView = useCallback((view: ViewName) => {
     if (view === 'admin-dashboard' && currentUser?.role !== 'admin') {
       setCurrentView('admin-login')
@@ -102,14 +94,10 @@ function App() {
     setCurrentView(view)
   }, [currentUser])
 
-  // ✅ Admin actions (Using secondaryAuth to prevent admin logout!)
   const handleAddStudent = useCallback(async (student: User) => {
     try {
       const authResult = await createUserWithEmailAndPassword(secondaryAuth, student.email!, student.password);
-      const studentWithAuthUid = { 
-        ...student, 
-        uid: authResult.user.uid 
-      };
+      const studentWithAuthUid = { ...student, uid: authResult.user.uid };
       await addUser(studentWithAuthUid);
       await refresh();
     } catch (err: any) {
@@ -126,10 +114,7 @@ function App() {
   const handleAddAdmin = useCallback(async (admin: User) => {
     try {
       const authResult = await createUserWithEmailAndPassword(secondaryAuth, admin.email!, admin.password);
-      const adminWithAuthUid = { 
-        ...admin, 
-        uid: authResult.user.uid 
-      };
+      const adminWithAuthUid = { ...admin, uid: authResult.user.uid };
       await addUser(adminWithAuthUid);
       await refresh();
     } catch (err: any) {
@@ -143,11 +128,9 @@ function App() {
     }
   }, [addUser, refresh]);
 
-    // ✅ NEW: Bulk Add Students Handler
   const handleBulkAddStudents = useCallback(async (studentsData: {firstName: string, lastName: string, email: string, password?: string}[]) => {
     const results = { success: 0, failed: 0, errors: [] as string[] };
     
-    // Process in batches of 5 to avoid Firebase rate limits
     for (let i = 0; i < studentsData.length; i += 5) {
       const batch = studentsData.slice(i, i + 5);
       
@@ -157,7 +140,6 @@ function App() {
           const password = data.password || `Temp${Math.random().toString(36).slice(-8)}!`;
           const name = `${data.firstName} ${data.lastName}`.trim();
           
-          // Create in Auth using secondary app
           const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
           const uid = userCredential.user.uid;
           
@@ -172,12 +154,8 @@ function App() {
             services_active: []
           };
           
-          // Save to Firestore
           await addUser(newUser);
-          
-          // Send password reset email
           await sendPasswordResetEmail(secondaryAuth, email);
-          
           results.success++;
         } catch (err: any) {
           console.error(`Failed to create ${data.email}:`, err.message);
@@ -186,7 +164,6 @@ function App() {
         }
       }));
       
-      // Small delay between batches to respect rate limits
       await new Promise(resolve => setTimeout(resolve, 1500)); 
     }
     
@@ -236,9 +213,7 @@ function App() {
   const renderView = () => {
     switch (currentView) {
       case 'catalog':
-        return <ServicesCatalog categories={SERVICE_CATEGORIES} 
-        onBookNow={() => handleSwitchView('booking')} 
-        />
+        return <ServicesCatalog categories={SERVICE_CATEGORIES} onBookNow={() => handleSwitchView('booking')} />
       
       case 'booking':
         return (
@@ -262,7 +237,7 @@ function App() {
             bookings={bookings}
             onAddStudent={handleAddStudent}
             onAddAdmin={handleAddAdmin}
-            onBulkAddStudents={handleBulkAddStudents} // ✅ MAKE SURE THIS LINE IS HERE
+            onBulkAddStudents={handleBulkAddStudents}
             onRemoveStudent={handleRemoveStudent}
             onResetData={handleResetData}
             onUpdateUser={handleUpdateUser}
@@ -271,7 +246,7 @@ function App() {
           <AdminLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
         )
       
-            case 'admin-dashboard':
+      case 'admin-dashboard':
         return currentUser?.role === 'admin' ? (
           <AdminDashboard
             currentUser={currentUser}
@@ -280,7 +255,7 @@ function App() {
             bookings={bookings}
             onAddStudent={handleAddStudent}
             onAddAdmin={handleAddAdmin}
-            onBulkAddStudents={handleBulkAddStudents} // ✅ MAKE SURE THIS LINE IS HERE
+            onBulkAddStudents={handleBulkAddStudents}
             onRemoveStudent={handleRemoveStudent}
             onResetData={handleResetData}
             onUpdateUser={handleUpdateUser}
