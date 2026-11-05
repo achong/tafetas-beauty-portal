@@ -94,22 +94,27 @@ function App() {
     setCurrentView(view)
   }, [currentUser])
 
-  const handleAddStudent = useCallback(async (student: User) => {
-    try {
-      const authResult = await createUserWithEmailAndPassword(secondaryAuth, student.email!, student.password);
-      const studentWithAuthUid = { ...student, uid: authResult.user.uid };
-      await addUser(studentWithAuthUid);
-      await refresh();
-    } catch (err: any) {
-      console.error('Failed to create student:', err);
-      if (err.code === 'auth/email-already-in-use') {
-        alert('A user with this email already exists.');
-      } else {
-        alert('Error creating student. Check console for details.');
-      }
-      throw err; 
+const handleAddStudent = useCallback(async (student: User) => {
+  try {
+    const authResult = await createUserWithEmailAndPassword(secondaryAuth, student.email!, student.password);
+    const studentWithAuthUid = { 
+      ...student, 
+      uid: authResult.user.uid 
+    };
+    await addUser(studentWithAuthUid);
+    await refresh();
+  } catch (err: any) {
+    console.error('Failed to create student:', err);
+    if (err.code === 'auth/email-already-in-use') {
+      alert('This email already exists in Firebase Authentication. Please check the Authentication tab in Firebase Console and delete the orphaned user, or use a different email.');
+    } else if (err.code === 'auth/invalid-email') {
+      alert('Invalid email address format.');
+    } else {
+      alert(`Error creating student: ${err.message}. Check console for details.`);
     }
-  }, [addUser, refresh]);
+    throw err; 
+  }
+}, [addUser, refresh]);
 
   const handleAddAdmin = useCallback(async (admin: User) => {
     try {
