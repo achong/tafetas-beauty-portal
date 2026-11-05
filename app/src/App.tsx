@@ -21,6 +21,11 @@ import { StudentDashboard } from '@/sections/StudentDashboard'
 import { useClinicData, resetAllData } from '@/hooks/useClinicData'
 import type { User, ViewName, Booking, ScheduleEntry } from '@/types'
 
+//import { getAuth } from 'firebase/auth' // ✅ added for bulk user creation
+   import { initializeApp } from 'firebase/app';
+   import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+   import { firebaseConfig } from '@/lib/firebase'; // Make sure this is exported from your firebase.ts file
+
 // ✅ CREATE SECONDARY AUTH INSTANCE HERE (Outside the component)
 const secondaryApp = initializeApp(firebaseConfig, 'Secondary');
 const secondaryAuth = getAuth(secondaryApp);
