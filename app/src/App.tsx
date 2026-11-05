@@ -143,6 +143,57 @@ function App() {
     }
   }, [addUser, refresh]);
 
+    // ✅ NEW: Bulk Add Students Handler
+  const handleBulkAddStudents = useCallback(async (studentsData: {firstName: string, lastName: string, email: string, password?: string}[]) => {
+    const results = { success: 0, failed: 0, errors: [] as string[] };
+    
+    // Process in batches of 5 to avoid Firebase rate limits
+    for (let i = 0; i < studentsData.length; i += 5) {
+      const batch = studentsData.slice(i, i + 5);
+      
+      await Promise.all(batch.map(async (data) => {
+        try {
+          const email = data.email.trim().toLowerCase();
+          const password = data.password || `Temp${Math.random().toString(36).slice(-8)}!`;
+          const name = `${data.firstName} ${data.lastName}`.trim();
+          
+          // Create in Auth using secondary app
+          const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+          const uid = userCredential.user.uid;
+          
+          const newUser: User = {
+            uid,
+            role: 'student',
+            name,
+            username: email,
+            email,
+            password,
+            isTemp: true,
+            services_active: []
+          };
+          
+          // Save to Firestore
+          await addUser(newUser);
+          
+          // Send password reset email
+          await sendPasswordResetEmail(secondaryAuth, email);
+          
+          results.success++;
+        } catch (err: any) {
+          console.error(`Failed to create ${data.email}:`, err.message);
+          results.failed++;
+          results.errors.push(`${data.email}: ${err.message}`);
+        }
+      }));
+      
+      // Small delay between batches to respect rate limits
+      await new Promise(resolve => setTimeout(resolve, 1500)); 
+    }
+    
+    refresh();
+    return results;
+  }, [addUser, refresh]);
+
   const handleRemoveStudent = useCallback((uid: string) => {
     removeUser(uid);
     refresh();
@@ -211,6 +262,7 @@ function App() {
             bookings={bookings}
             onAddStudent={handleAddStudent}
             onAddAdmin={handleAddAdmin}
+            onBulkAddStudents={handleBulkAddStudents} // ✅ MAKE SURE THIS LINE IS HERE
             onRemoveStudent={handleRemoveStudent}
             onResetData={handleResetData}
             onUpdateUser={handleUpdateUser}
@@ -219,7 +271,7 @@ function App() {
           <AdminLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
         )
       
-      case 'admin-dashboard':
+            case 'admin-dashboard':
         return currentUser?.role === 'admin' ? (
           <AdminDashboard
             currentUser={currentUser}
@@ -228,6 +280,7 @@ function App() {
             bookings={bookings}
             onAddStudent={handleAddStudent}
             onAddAdmin={handleAddAdmin}
+            onBulkAddStudents={handleBulkAddStudents} // ✅ MAKE SURE THIS LINE IS HERE
             onRemoveStudent={handleRemoveStudent}
             onResetData={handleResetData}
             onUpdateUser={handleUpdateUser}
