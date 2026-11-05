@@ -132,6 +132,34 @@ export function BookingView({
     return status;
   }, [bookedTimesForDate, availableSlots]);
 
+    // ✅ NEW: Calculate currently offered services based on open schedule slots
+  const currentlyOfferedServices = useMemo(() => {
+    if (!schedule || !users || !services) return [];
+
+    // 1. Find students who have at least one open slot in the schedule
+    const activeStudentIds = new Set<string>();
+    schedule.forEach((slot: any) => {
+      if (slot.is_open === true && slot.student_id) {
+        activeStudentIds.add(slot.student_id);
+      }
+    });
+
+    // 2. Get all unique service_ids offered by these active students
+    const offeredServiceIds = new Set<string>();
+    users.forEach((user) => {
+      if (user.role === 'student' && activeStudentIds.has(user.uid)) {
+        (user.services_active || []).forEach((serviceId) => {
+          offeredServiceIds.add(serviceId);
+        });
+      }
+    });
+
+    // 3. Map service_ids to actual service objects and sort alphabetically
+    return services
+      .filter((s) => offeredServiceIds.has(s.service_id))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [schedule, users, services]);
+
   const handleServiceChange = (val: string) => {
     setSelectedServiceId(val);
     setSelectedStudentId('');
@@ -269,6 +297,7 @@ export function BookingView({
 
   return (
     <div className="fade-in max-w-5xl mx-auto">
+      {/* 1. HERO SECTION */}
       <div className="bg-muted/30 rounded-2xl p-6 md:p-8 mb-8 border border-border">
         <div className="flex items-start gap-4">
           <div className="p-3 bg-primary rounded-xl shadow-lg">
@@ -285,6 +314,35 @@ export function BookingView({
         </div>
       </div>
 
+
+      {/* ✅ 2. PASTE THE NEW BOX RIGHT HERE ✅ */}
+      {/* Currently Offered Services Box */}
+      <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 mb-8 animate-in fade-in slide-in-from-bottom-2">
+        <h3 className="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-primary" />
+          The services we are currently offering are:
+        </h3>
+        
+        {currentlyOfferedServices.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {currentlyOfferedServices.map((service) => (
+              <span 
+                key={service.service_id} 
+                className="bg-background border border-border text-foreground px-3 py-1.5 rounded-full text-sm font-medium shadow-sm hover:border-primary transition-colors"
+              >
+                {service.name}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted-foreground text-sm italic">
+            No services are currently available. Please check back soon!
+          </p>
+        )}
+      </div>
+
+
+      {/* 3. MAIN BOOKING CARD STARTS HERE */}
       <div className="bg-card rounded-2xl shadow-md border border-border p-6 md:p-8">
         <div className="flex items-center justify-center gap-2 md:gap-4 mb-8 overflow-x-auto pb-2">
           {steps.map((step, i) => (
