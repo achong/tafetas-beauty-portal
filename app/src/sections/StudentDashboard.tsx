@@ -9,6 +9,8 @@ import {
   X,
   Calendar,
   XCircle,
+  Save,
+  RotateCcw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,7 +29,6 @@ import type { User, Service, ScheduleEntry, Booking } from '@/types';
 import { CLINIC_TIME_SLOTS } from '@/hooks/useClinicData';
 import { db } from '@/lib/firebase';
 import { updateDoc, doc } from 'firebase/firestore';
-
 
 interface StudentDashboardProps {
   currentUser: User;
@@ -55,6 +56,10 @@ export function StudentDashboard({
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  
+  // ✅ NEW: Draft state for unsaved changes
+  const [draftSchedule, setDraftSchedule] = useState<ScheduleEntry[] | null>(null);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
   const categoryList = useMemo(() => Object.keys(categories), [categories]);
 
@@ -73,9 +78,12 @@ export function StudentDashboard({
     [calendarYear, calendarMonth]
   );
 
+  // ✅ Use draft schedule if it exists, otherwise use live schedule
+  const activeSchedule = draftSchedule || schedule;
+
   const scheduleForUser = useMemo(
-    () => schedule.filter((s) => s.student_id === currentUser.uid),
-    [schedule, currentUser.uid]
+    () => activeSchedule.filter((s) => s.student_id === currentUser.uid),
+    [activeSchedule, currentUser.uid]
   );
 
   const bookingsForUser = useMemo(
@@ -83,21 +91,24 @@ export function StudentDashboard({
     [bookings, currentUser.uid]
   );
 
-  // ✅ NEW: Function to cancel a booking and send email
+  // ✅ Check if there are unsaved changes
+  const hasUnsavedChanges = useMemo(() => {
+    if (!draftSchedule) return false;
+    return JSON.stringify(draftSchedule) !== JSON.stringify(schedule);
+  }, [draftSchedule, schedule]);
+
   const handleCancelBooking = async (booking: Booking) => {
     if (!confirm(`Are you sure you want to cancel the appointment with ${booking.client_name} on ${booking.date} at ${booking.time}? This will send them a cancellation email.`)) {
       return;
     }
 
     try {
-      // 1. Update status in Firebase
       if (booking.id) {
         await updateDoc(doc(db, 'bookings', booking.id.toString()), {
           status: 'cancelled_by_student'
         });
       }
 
-      // 2. Prepare email data
       const templateParams = {
         client_name: booking.client_name || 'Valued Client',
         service_name: booking.service?.name || 'Salon Service',
@@ -106,14 +117,13 @@ export function StudentDashboard({
         to_email: booking.client_email,
       };
 
-      // 3. Send Cancellation Email using native fetch
       await fetch('https://api.emailjs.com/api/v1.0/email/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           service_id: 'service_4qnx88c',
           template_id: 'template_iw9q39l',
-          user_id: 'rVWHR3b4DfTP9T7om', // Your Public Key
+          user_id: 'rVWHR3b4DfTP9T7om',
           template_params: templateParams,
         }),
       });
@@ -175,15 +185,21 @@ export function StudentDashboard({
     });
   }, [selectedDate, scheduleForUser, bookingsForUser]);
 
+  // ✅ UPDATED: Toggle slot now updates draft instead of live schedule
   const toggleSlot = (time: string) => {
     if (!selectedDate) return;
-    const all = [...schedule];
+    
+    // Initialize draft if it doesn't exist
+    const currentSchedule = draftSchedule || [...schedule];
+    const all = [...currentSchedule];
+    
     const idx = all.findIndex(
       (s) =>
         s.student_id === currentUser.uid &&
         s.date === selectedDate &&
         s.time === time
     );
+    
     if (idx >= 0) {
       all[idx] = { ...all[idx], is_open: !all[idx].is_open };
     } else {
@@ -194,12 +210,16 @@ export function StudentDashboard({
         is_open: true,
       });
     }
-    onUpdateSchedule(all);
+    
+    setDraftSchedule(all);
   };
 
+  // ✅ UPDATED: Toggle all slots now updates draft
   const toggleAllSlots = (mode: 'open' | 'closed') => {
     if (!selectedDate) return;
-    const all = [...schedule];
+    
+    const currentSchedule = draftSchedule || [...schedule];
+    const all = [...currentSchedule];
     const bookedTimes = bookingsForUser
       .filter((b) => b.date === selectedDate)
       .map((b) => b.time);
@@ -229,7 +249,30 @@ export function StudentDashboard({
         }
       }
     });
-    onUpdateSchedule(all);
+    
+    setDraftSchedule(all);
+  };
+
+  // ✅ NEW: Save draft to Firebase
+  const handleSaveSchedule = async () => {
+    if (!draftSchedule) return;
+    
+    try {
+      await onUpdateSchedule(draftSchedule);
+      setDraftSchedule(null);
+      setShowSaveSuccess(true);
+      setTimeout(() => setShowSaveSuccess(false), 3000);
+    } catch (error) {
+      console.error('Error saving schedule:', error);
+      alert('Failed to save schedule. Please try again.');
+    }
+  };
+
+  // ✅ NEW: Discard draft changes
+  const handleDiscardChanges = () => {
+    if (confirm('Discard all unsaved changes?')) {
+      setDraftSchedule(null);
+    }
   };
 
   const handleChangePassword = () => {
@@ -248,7 +291,6 @@ export function StudentDashboard({
     alert('Password updated successfully');
   };
 
-  // Filter out cancelled bookings and past dates for the list
   const upcomingBookings = bookingsForUser.filter(
     (b) => b.status !== 'cancelled_by_student' && b.date >= new Date().toISOString().split('T')[0]
   );
@@ -490,13 +532,53 @@ export function StudentDashboard({
                     </button>
                   ))}
                 </div>
+
+                {/* ✅ NEW: Save & Discard Buttons */}
+                {hasUnsavedChanges && (
+                  <div className="mt-6 space-y-3 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                      <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+                      <p className="text-sm text-amber-500 font-medium">
+                        You have unsaved changes
+                      </p>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleSaveSchedule}
+                        className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
+                      >
+                        <Save className="w-4 h-4 mr-2" />
+                        Save Schedule
+                      </Button>
+                      <Button
+                        onClick={handleDiscardChanges}
+                        variant="outline"
+                        className="border-border text-foreground hover:bg-accent"
+                      >
+                        <RotateCcw className="w-4 h-4 mr-2" />
+                        Discard
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ✅ Success Message */}
+                {showSaveSuccess && (
+                  <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg animate-in fade-in slide-in-from-bottom-2">
+                    <div className="flex items-center gap-2 text-green-500">
+                      <Check className="w-4 h-4" />
+                      <p className="text-sm font-medium">Schedule saved successfully!</p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* ✅ NEW: Upcoming Appointments Section */}
+      {/* Upcoming Appointments Section */}
       <Card className="bg-card border-border text-card-foreground">
         <CardHeader className="border-b border-border bg-card">
           <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
