@@ -1,5 +1,5 @@
 // app/src/components/FormRenderer.tsx
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,14 +11,21 @@ import type { Form, FormResponse } from '@/types';
 
 interface FormRendererProps {
   form: Form;
+  formSection: 'client_session' | 'therapist_pre' | 'therapist_post' | 'assessor';
   initialValues?: Record<string, any>;
   onSubmit: (responses: FormResponse[]) => void;
   onCancel: () => void;
 }
 
-export function FormRenderer({ form, initialValues = {}, onSubmit, onCancel }: FormRendererProps) {
-  // ✅ FIX: Explicitly define the fields array to prevent TypeScript 'never' inference
-  const fields = form.client_session_fields || [];
+export function FormRenderer({ form, formSection, initialValues = {}, onSubmit, onCancel }: FormRendererProps) {
+  // ✅ Dynamically select fields based on the section
+  const fields = useMemo(() => {
+    if (formSection === 'client_session') return form.client_session_fields || [];
+    if (formSection === 'therapist_pre') return form.therapist_pre_fields || [];
+    if (formSection === 'therapist_post') return form.therapist_post_fields || [];
+    if (formSection === 'assessor') return form.assessor_fields || [];
+    return [];
+  }, [form, formSection]);
 
   const [responses, setResponses] = useState<FormResponse[]>(() => {
     return fields.map((field: any) => ({
@@ -40,11 +47,20 @@ export function FormRenderer({ form, initialValues = {}, onSubmit, onCancel }: F
     onSubmit(responses);
   };
 
+  const getSectionTitle = () => {
+    if (formSection === 'client_session') return 'Client Paperwork & Signature';
+    if (formSection === 'therapist_pre') return 'Pre-Service Treatment Plan';
+    if (formSection === 'therapist_post') return 'Post-Service Evaluation';
+    if (formSection === 'assessor') return 'Assessor Grading & Feedback';
+    return '';
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <h3 className="text-lg font-bold text-primary border-b border-border pb-2">{getSectionTitle()}</h3>
+      
       <div className="space-y-4">
-        {/* ✅ FIX: Added parentheses around (fields) so .map() executes correctly */}
-        {(fields).map((field: any) => (
+        {fields.map((field: any) => (
           <div key={field.field_id} className="space-y-2">
             <Label className="text-sm font-medium text-foreground">
               {field.label} {field.required && <span className="text-red-500">*</span>}
@@ -125,6 +141,24 @@ export function FormRenderer({ form, initialValues = {}, onSubmit, onCancel }: F
                 />
               </div>
             )}
+
+            {field.type === 'date' && (
+              <Input 
+                type="date"
+                value={responses.find(r => r.field_id === field.field_id)?.value || ''}
+                onChange={(e) => updateResponse(field.field_id, e.target.value)}
+                className="bg-background border-border text-foreground"
+              />
+            )}
+
+            {field.type === 'number' && (
+              <Input 
+                type="number"
+                value={responses.find(r => r.field_id === field.field_id)?.value || ''}
+                onChange={(e) => updateResponse(field.field_id, e.target.value)}
+                className="bg-background border-border text-foreground"
+              />
+            )}
           </div>
         ))}
       </div>
@@ -134,7 +168,7 @@ export function FormRenderer({ form, initialValues = {}, onSubmit, onCancel }: F
           Cancel
         </Button>
         <Button type="submit" className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground">
-          Submit & Continue
+          Save Section
         </Button>
       </div>
     </form>
