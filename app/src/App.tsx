@@ -131,7 +131,7 @@ function App() {
 
   const handleAddStudent = useCallback(async (student: User) => {
     try {
-      const authResult = await createUserWithEmailAndPassword(secondaryAuth, student.email!, student.password);
+      const authResult = await createUserWithEmailAndPassword(secondaryAuth, student.email!, student.password!);
       const studentWithAuthUid = { ...student, uid: authResult.user.uid };
       await addUser(studentWithAuthUid);
       await refresh();
@@ -148,7 +148,7 @@ function App() {
 
   const handleAddAdmin = useCallback(async (admin: User) => {
     try {
-      const authResult = await createUserWithEmailAndPassword(secondaryAuth, admin.email!, admin.password);
+      const authResult = await createUserWithEmailAndPassword(secondaryAuth, admin.email!, admin.password!);
       const adminWithAuthUid = { ...admin, uid: authResult.user.uid };
       await addUser(adminWithAuthUid);
       await refresh();

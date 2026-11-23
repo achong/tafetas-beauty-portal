@@ -36,7 +36,7 @@ export function ClientDashboard({ client, onUpdateClient, onLogout, onSwitchView
   const handleSave = async () => {
     setSaving(true);
     try {
-      await updateDoc(doc(db, 'clients', client.uid), formData);
+      await updateDoc(doc(db, 'clients', client.uid), formData as any);
       onUpdateClient(formData);
       setMessage('Profile saved successfully!');
       setTimeout(() => setMessage(''), 3000);

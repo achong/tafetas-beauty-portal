@@ -2,253 +2,145 @@
 import type { Form } from '@/types';
 
 export const SERVICE_FORMS: Form[] = [
-  // 1. EXISTING FACIAL FORM
+  // ==========================================
+  // 1. HAIRDRESSING FORM
+  // ==========================================
   {
-    form_id: "form_facial_basic",
-    service_id: "facial_basic",
-    title: "Facial Treatment Consent & Consultation",
-    description: "Please complete this form before your appointment.",
+    form_id: "form_hairdressing",
+    service_id: "hair_cut", // Applies to hair_cut, hair_colour, hair_chemical_reformation, hair_consultation
+    title: "Hairdressing Consultation & Treatment Plan",
+    description: "Please complete the client sections before your appointment. The stylist will complete the rest.",
     is_required: true,
     created_at: new Date().toISOString(),
-    fields: [
-      { field_id: "full_name", label: "Full Legal Name", type: "text", required: true, placeholder: "Jane Doe" },
-      { field_id: "dob", label: "Date of Birth", type: "date", required: true },
-      { field_id: "allergies", label: "Do you have any known allergies? (e.g., nuts, latex, skincare ingredients)", type: "textarea", required: true, placeholder: "List any allergies here, or type 'None'." },
-      { field_id: "pregnant", label: "Are you currently pregnant or breastfeeding?", type: "select", required: true, options: ["Yes, pregnant", "Yes, breastfeeding", "No", "Prefer not to say"] },
-      { field_id: "consent", label: "I consent to the facial treatment and understand the aftercare instructions.", type: "checkbox", required: true }
+    
+    client_static_fields: [
+      { field_id: "medical_conditions", label: "Medical Conditions (e.g., Eczema, Alopecia, Allergies)", type: "textarea", required: true, placeholder: "List any conditions or type 'None'" },
+      { field_id: "medications", label: "Medications causing hair loss/thinning?", type: "select", required: true, options: ["Yes", "No"] },
+      { field_id: "pregnancy", label: "Currently pregnant or breastfeeding?", type: "select", required: true, options: ["Yes", "No"] },
+      { field_id: "hair_concerns", label: "Hair & Scalp Concerns", type: "textarea", required: true, placeholder: "e.g., Dry hair, Oily scalp, Dandruff, Hair loss" },
+      { field_id: "chemical_history", label: "Chemical History (Colour, Bleach, Keratin, Perms)", type: "textarea", required: true, placeholder: "When was it last done? Details of products used." },
+      { field_id: "hair_care_regime", label: "Hair Care Regime", type: "textarea", required: true, placeholder: "Products used, heat tool frequency, sun/chlorine exposure, extensions." }
+    ],
+    client_session_fields: [
+      { field_id: "service_goal", label: "What are you hoping to achieve from your service today?", type: "textarea", required: true },
+      { field_id: "satisfaction", label: "Are you happy with your current hairstyle/colour? If not, what would you change?", type: "textarea", required: true },
+      { field_id: "agreement", label: "I have read the TasTAFE General Agreement & Model Release and understand my responsibilities.", type: "checkbox", required: true },
+      { field_id: "client_signature", label: "Client Digital Signature", type: "signature", required: true }
+    ],
+    therapist_pre_fields: [
+      { field_id: "therapist_name", label: "Therapist Name", type: "text", required: true },
+      { field_id: "contraindications_prevent", label: "Contraindications preventing service?", type: "select", required: true, options: ["Yes", "No", "N/A"] },
+      { field_id: "contraindications_modify", label: "Contraindications requiring modification?", type: "select", required: true, options: ["Yes", "No", "N/A"] },
+      { field_id: "patch_test_date", label: "Patch Test Date", type: "date", required: false },
+      { field_id: "patch_test_result", label: "Patch Test Result", type: "select", required: false, options: ["Positive", "Negative", "N/A"] },
+      { field_id: "treatment_plan", label: "Proposed Treatment Plan & Techniques", type: "textarea", required: true }
+    ],
+    therapist_post_fields: [
+      { field_id: "finish_time", label: "Finish Time", type: "text", required: true },
+      { field_id: "total_time", label: "Total Time of Service", type: "text", required: true },
+      { field_id: "adverse_effects", label: "Any adverse effects?", type: "select", required: true, options: ["Yes", "No"] },
+      { field_id: "aftercare_advice", label: "Aftercare advice given & products recommended", type: "textarea", required: true },
+      { field_id: "cost", label: "Cost of Service ($)", type: "number", required: true },
+      { field_id: "payment_method", label: "Payment Method", type: "select", required: true, options: ["Cash", "Eftpos", "Other"] }
+    ],
+    assessor_fields: [
+      { field_id: "assessment_result", label: "Assessment Result", type: "select", required: true, options: ["Satisfactory", "Not Satisfactory"] },
+      { field_id: "assessor_signature", label: "Assessor Signature", type: "signature", required: true },
+      { field_id: "assessor_feedback", label: "Assessor Feedback/Comments", type: "textarea", required: false }
     ]
   },
 
-  // 2. HAIR CONSULTATION FORM
+  // ==========================================
+  // 2. BEAUTY & FACIAL FORM
+  // ==========================================
   {
-    form_id: "form_hair_consultation",
-    service_id: "hair_consultation",
-    title: "Hairdressing Client Consultation Form",
-    description: "Please complete this form to help us understand your hair history and achieve the best results.",
+    form_id: "form_beauty_facial",
+    service_id: "facial_basic", // Applies to facial_basic and other skin services
+    title: "Beauty & Facial Treatment Plan",
+    description: "Please complete the client sections before your appointment.",
     is_required: true,
     created_at: new Date().toISOString(),
-    fields: [
-      { field_id: "name", label: "Full Name", type: "text", required: true, placeholder: "Jane Doe" },
-      { field_id: "address", label: "Address", type: "text", required: true },
-      { field_id: "email", label: "Email", type: "text", required: true },
-      { field_id: "mobile", label: "Mobile Phone", type: "text", required: true },
-      { 
-        field_id: "medical_history", 
-        label: "Medical History", 
-        type: "textarea", 
-        required: true,
-        placeholder: "Please list if you suffer from: Eczema, Psoriasis, Alopecia, Migraines, Allergies, Recent surgery, or if you are pregnant/breastfeeding. Type 'None' if not applicable."
-      },
-      {
-        field_id: "hair_concerns",
-        label: "Hair & Scalp Concerns",
-        type: "textarea",
-        required: true,
-        placeholder: "e.g., Dry hair, Oily scalp, Damaged hair, Dandruff, Itchy scalp, Hair loss."
-      },
-      {
-        field_id: "chemical_history",
-        label: "Chemical History",
-        type: "textarea",
-        required: true,
-        placeholder: "Is your hair coloured or bleached? How often? When was it last done? Have you had any chemical reformation services?"
-      },
-      {
-        field_id: "hair_care_regime",
-        label: "Hair Care Regime",
-        type: "textarea",
-        required: true,
-        placeholder: "Products currently used, heat tool frequency, sun/chlorine exposure, and if you have hair extensions."
-      },
-      {
-        field_id: "service_goal",
-        label: "Service Goal",
-        type: "textarea",
-        required: true,
-        placeholder: "What are you hoping to achieve from your service today?"
-      },
-      {
-        field_id: "client_agreement",
-        label: "I certify that all of the information I have given on this form is accurate.",
-        type: "checkbox",
-        required: true
-      },
-      {
-        field_id: "client_signature",
-        label: "Client Signature",
-        type: "signature",
-        required: true
-      }
+    
+    client_static_fields: [
+      { field_id: "medical_conditions", label: "Medical Conditions (e.g., Acne, Eczema, Rosacea, Epilepsy)", type: "textarea", required: true },
+      { field_id: "medications", label: "Medications (especially Accutane/Retin A)?", type: "select", required: true, options: ["Yes", "No"] },
+      { field_id: "pregnancy", label: "Currently pregnant or breastfeeding?", type: "select", required: true, options: ["Yes", "No"] },
+      { field_id: "skin_care_regime", label: "Current Skin Care Products & Active Ingredients", type: "textarea", required: true, placeholder: "e.g., Cleanser, Retinol, Glycolic Acid" },
+      { field_id: "recent_treatments", label: "Recent cosmetic injectables, peels, or microdermabrasion (past 1-3 months)?", type: "select", required: true, options: ["Yes", "No"] }
+    ],
+    client_session_fields: [
+      { field_id: "service_goal", label: "What are you hoping to achieve from your treatment today?", type: "textarea", required: true },
+      { field_id: "special_requirements", label: "Do you have any special requirements for your treatment?", type: "textarea", required: false },
+      { field_id: "agreement", label: "I certify that all information given is accurate and I agree to the proposed treatment.", type: "checkbox", required: true },
+      { field_id: "client_signature", label: "Client Digital Signature", type: "signature", required: true }
+    ],
+    therapist_pre_fields: [
+      { field_id: "therapist_name", label: "Therapist Name", type: "text", required: true },
+      { field_id: "contraindications_prevent", label: "Contraindications preventing service?", type: "select", required: true, options: ["Yes", "No", "N/A"] },
+      { field_id: "contraindications_modify", label: "Contraindications requiring modification?", type: "select", required: true, options: ["Yes", "No", "N/A"] },
+      { field_id: "patch_test_date", label: "Patch Test Date (if applicable)", type: "date", required: false },
+      { field_id: "patch_test_result", label: "Patch Test Result", type: "select", required: false, options: ["Positive", "Negative", "N/A"] },
+      { field_id: "skin_analysis", label: "Skin Analysis (Type, Fitzpatrick, Conditions, Photoaging)", type: "textarea", required: true },
+      { field_id: "treatment_plan", label: "Proposed Treatment Plan, Products & Techniques", type: "textarea", required: true }
+    ],
+    therapist_post_fields: [
+      { field_id: "finish_time", label: "Finish Time", type: "text", required: true },
+      { field_id: "total_time", label: "Total Time of Service", type: "text", required: true },
+      { field_id: "adverse_effects", label: "Any adverse effects?", type: "select", required: true, options: ["Yes", "No"] },
+      { field_id: "aftercare_advice", label: "Aftercare advice & products recommended", type: "textarea", required: true },
+      { field_id: "cost", label: "Cost of Service ($)", type: "number", required: true },
+      { field_id: "payment_method", label: "Payment Method", type: "select", required: true, options: ["Cash", "Eftpos", "Other"] }
+    ],
+    assessor_fields: [
+      { field_id: "assessment_result", label: "Assessment Result", type: "select", required: true, options: ["Satisfactory", "Not Satisfactory"] },
+      { field_id: "assessor_signature", label: "Assessor Signature", type: "signature", required: true },
+      { field_id: "assessor_feedback", label: "Assessor Feedback/Comments", type: "textarea", required: false }
     ]
   },
 
-  // 3. HAIR CUT SERVICE PLAN
+  // ==========================================
+  // 3. NAILS & LASH/BROW FORM
+  // ==========================================
   {
-    form_id: "form_hair_cut",
-    service_id: "hair_cut",
-    title: "Hair Cut Service Plan",
-    description: "To be completed with your stylist to ensure your desired haircut is achieved.",
+    form_id: "form_nails_lash",
+    service_id: "nail_service", // Generic ID for nail/lash services
+    title: "Nail & Lash/Brow Treatment Plan",
+    description: "Please complete the client sections before your appointment.",
     is_required: true,
     created_at: new Date().toISOString(),
-    fields: [
-      {
-        field_id: "hair_characteristics",
-        label: "Hair Characteristics",
-        type: "textarea",
-        required: true,
-        placeholder: "Hair Type (Oily/Dry/Normal), Texture (Fine/Medium/Coarse), Density (Thin/Average/Thick), Length, Condition, and Scalp Condition."
-      },
-      {
-        field_id: "hair_shape_patterns",
-        label: "Hair Shape & Growth Patterns",
-        type: "textarea",
-        required: true,
-        placeholder: "Movement (Straight/Wavy/Curly), Face Shape, and any growth patterns (e.g., cowlicks, widow's peak)."
-      },
-      {
-        field_id: "cutting_techniques",
-        label: "Planned Cutting Techniques (Stylist to complete)",
-        type: "textarea",
-        required: false,
-        placeholder: "e.g., Blunt cutting, Notching, Slicing, Point cutting, Overcomb, Graduation."
-      },
-      {
-        field_id: "client_agreement",
-        label: "I agree to the proposed haircut service.",
-        type: "checkbox",
-        required: true
-      },
-      {
-        field_id: "client_signature",
-        label: "Client Signature",
-        type: "signature",
-        required: true
-      }
-    ]
-  },
-
-  // 4. CHEMICAL REFORMATION SERVICE PLAN
-  {
-    form_id: "form_hair_chemical_reformation",
-    service_id: "hair_chemical_reformation",
-    title: "Chemical Reformation Service Plan",
-    description: "Required for all chemical straightening, perming, or smoothing services.",
-    is_required: true,
-    created_at: new Date().toISOString(),
-    fields: [
-      {
-        field_id: "contraindications",
-        label: "Contraindications",
-        type: "textarea",
-        required: true,
-        placeholder: "Do you have any contraindications to this service? (If yes, please provide details)."
-      },
-      {
-        field_id: "pre_service_tests",
-        label: "Pre-Service Tests (Stylist to complete)",
-        type: "textarea",
-        required: false,
-        placeholder: "Patch test date & result, Strand test date & result."
-      },
-      {
-        field_id: "client_expectations",
-        label: "Expected Result",
-        type: "select",
-        required: true,
-        options: ["Soften hair and tame frizz", "Soft, straight, smooth hair with some volume", "Pin straight hair"]
-      },
-      {
-        field_id: "pre_treatment_analysis",
-        label: "Pre-Treatment Analysis",
-        type: "textarea",
-        required: true,
-        placeholder: "Hair type, curl pattern (Type 1-4), texture, porosity, elasticity, density, length, condition, and scalp condition."
-      },
-      {
-        field_id: "chemical_history_reform",
-        label: "Chemical History (Past 5 Years)",
-        type: "textarea",
-        required: true,
-        placeholder: "Current hair colour (Natural/Artificial), products used to colour/lighten, and any previous chemical reformation treatments."
-      },
-      {
-        field_id: "client_agreement",
-        label: "I agree to the proposed chemical reformation service.",
-        type: "checkbox",
-        required: true
-      },
-      {
-        field_id: "client_signature",
-        label: "Client Signature",
-        type: "signature",
-        required: true
-      }
-    ]
-  },
-
-  // 5. COLOUR SERVICE PLAN
-  {
-    form_id: "form_hair_colour",
-    service_id: "hair_colour",
-    title: "Colour Service Plan",
-    description: "Required for all hair colouring, highlighting, or bleaching services.",
-    is_required: true,
-    created_at: new Date().toISOString(),
-    fields: [
-      {
-        field_id: "contraindications_colour",
-        label: "Contraindications",
-        type: "textarea",
-        required: true,
-        placeholder: "Do you have any contraindications to this hair colour service? (If yes, please provide details)."
-      },
-      {
-        field_id: "pre_service_tests_colour",
-        label: "Pre-Service Tests (Stylist to complete)",
-        type: "textarea",
-        required: false,
-        placeholder: "Patch test date & result, Strand test date & result."
-      },
-      {
-        field_id: "pre_treatment_analysis_colour",
-        label: "Pre-Treatment Analysis",
-        type: "textarea",
-        required: true,
-        placeholder: "Hair type, texture, porosity, elasticity, density, length, condition, scalp condition, and skin tone (Fair/Medium/Olive/Dark)."
-      },
-      {
-        field_id: "current_hair_colour",
-        label: "Current Hair Colour Details",
-        type: "textarea",
-        required: true,
-        placeholder: "Natural or Artificial base level, colour tones (Warm/Cool/Neutral), and percentage of white hair (0%, 20%, 50%, 80%+)."
-      },
-      {
-        field_id: "colour_history",
-        label: "Colour History",
-        type: "textarea",
-        required: true,
-        placeholder: "Current artificial colour type (All over, Highlights, Bleach, etc.), previous products used, and any other chemical treatments."
-      },
-      {
-        field_id: "desired_colour_result",
-        label: "Desired Colour Result",
-        type: "textarea",
-        required: true,
-        placeholder: "Desired level and tones (Warm/Cool/Neutral) for regrowth, mid-lengths, and ends."
-      },
-      {
-        field_id: "client_agreement",
-        label: "I agree to the proposed colour service.",
-        type: "checkbox",
-        required: true
-      },
-      {
-        field_id: "client_signature",
-        label: "Client Signature",
-        type: "signature",
-        required: true
-      }
+    
+    client_static_fields: [
+      { field_id: "medical_conditions", label: "Medical Conditions (e.g., Diabetes, Circulatory disorders, Skin conditions)", type: "textarea", required: true },
+      { field_id: "allergies", label: "Allergies (especially to acrylics, glues, or henna)?", type: "select", required: true, options: ["Yes", "No"] },
+      { field_id: "pregnancy", label: "Currently pregnant or breastfeeding?", type: "select", required: true, options: ["Yes", "No"] }
+    ],
+    client_session_fields: [
+      { field_id: "service_goal", label: "Desired nail shape, length, or lash style?", type: "textarea", required: true },
+      { field_id: "age_consent", label: "Is the client over the age of consent (18 for intimate, 16 for chemical)?", type: "select", required: true, options: ["Yes", "No"] },
+      { field_id: "agreement", label: "I agree to the proposed nail/lash plan and understand the risks.", type: "checkbox", required: true },
+      { field_id: "client_signature", label: "Client Digital Signature", type: "signature", required: true }
+    ],
+    therapist_pre_fields: [
+      { field_id: "therapist_name", label: "Therapist Name", type: "text", required: true },
+      { field_id: "contraindications_prevent", label: "Contraindications preventing service?", type: "select", required: true, options: ["Yes", "No", "N/A"] },
+      { field_id: "contraindications_modify", label: "Contraindications requiring modification?", type: "select", required: true, options: ["Yes", "No", "N/A"] },
+      { field_id: "patch_test_date", label: "Patch Test Date", type: "date", required: false },
+      { field_id: "patch_test_result", label: "Patch Test Result", type: "select", required: false, options: ["Positive", "Negative", "N/A"] },
+      { field_id: "nail_lash_analysis", label: "Nail/Lash Analysis (Shape, condition, density, eye shape)", type: "textarea", required: true },
+      { field_id: "treatment_plan", label: "Proposed Treatment Plan, Products & Techniques", type: "textarea", required: true }
+    ],
+    therapist_post_fields: [
+      { field_id: "finish_time", label: "Finish Time", type: "text", required: true },
+      { field_id: "total_time", label: "Total Time of Service", type: "text", required: true },
+      { field_id: "adverse_effects", label: "Any adverse effects?", type: "select", required: true, options: ["Yes", "No"] },
+      { field_id: "aftercare_advice", label: "Aftercare advice & products recommended", type: "textarea", required: true },
+      { field_id: "cost", label: "Cost of Service ($)", type: "number", required: true },
+      { field_id: "payment_method", label: "Payment Method", type: "select", required: true, options: ["Cash", "Eftpos", "Other"] }
+    ],
+    assessor_fields: [
+      { field_id: "assessment_result", label: "Assessment Result", type: "select", required: true, options: ["Satisfactory", "Not Satisfactory"] },
+      { field_id: "assessor_signature", label: "Assessor Signature", type: "signature", required: true },
+      { field_id: "assessor_feedback", label: "Assessor Feedback/Comments", type: "textarea", required: false }
     ]
   }
 ];
