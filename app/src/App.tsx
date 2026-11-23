@@ -16,10 +16,12 @@ import { AdminLogin } from '@/sections/AdminLogin'
 import { AdminDashboard } from '@/sections/AdminDashboard'
 import { StudentLogin } from '@/sections/StudentLogin'
 import { StudentDashboard } from '@/sections/StudentDashboard'
+import { ClientLogin } from '@/sections/ClientLogin'
+import { ClientDashboard } from '@/sections/ClientDashboard'
 
 // Hooks & Types
 import { useClinicData, resetAllData } from '@/hooks/useClinicData'
-import type { User, ViewName, Booking, ScheduleEntry } from '@/types'
+import type { User, Client, ViewName, Booking, ScheduleEntry } from '@/types'
 
 // ✅ CREATE SECONDARY AUTH INSTANCE HERE (Outside the component)
 const secondaryApp = initializeApp(firebaseConfig, 'Secondary');
@@ -28,6 +30,7 @@ const secondaryAuth = getAuth(secondaryApp);
 function App() {
   const [currentView, setCurrentView] = useState<ViewName>('catalog')
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [currentClient, setCurrentClient] = useState<Client | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
   
   const {
@@ -48,24 +51,41 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
         try {
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid))
+          // Check Admin/Student first
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
           if (userDoc.exists()) {
-            setCurrentUser(userDoc.data() as User)
+            setCurrentUser(userDoc.data() as User);
+            setCurrentClient(null);
+            setCurrentView(userDoc.data().role === 'admin' ? 'admin-dashboard' : 'student-dashboard');
+            setAuthLoading(false);
+            return;
+          }
+
+          // Check Client
+          const clientDoc = await getDoc(doc(db, 'clients', firebaseUser.uid));
+          if (clientDoc.exists()) {
+            setCurrentClient(clientDoc.data() as Client);
+            setCurrentUser(null);
+            setCurrentView('client-dashboard');
           } else {
-            await signOut(auth)
-            setCurrentUser(null)
+            await signOut(auth);
+            setCurrentUser(null);
+            setCurrentClient(null);
           }
         } catch (error) {
-          console.error('Error fetching user data:', error)
-          setCurrentUser(null)
+          console.error('Error fetching user data:', error);
+          setCurrentUser(null);
+          setCurrentClient(null);
         }
       } else {
-        setCurrentUser(null)
+        setCurrentUser(null);
+        setCurrentClient(null);
+        setCurrentView('catalog');
       }
-      setAuthLoading(false)
-    })
+      setAuthLoading(false);
+    });
 
-    return () => unsubscribe()
+    return () => unsubscribe();
   }, [])
 
   const handleLogin = useCallback((user: User) => {
@@ -79,8 +99,23 @@ function App() {
       console.error('Error signing out:', error)
     }
     setCurrentUser(null)
+    setCurrentClient(null)
     setCurrentView('catalog')
   }, [])
+
+  const handleClientUpdate = useCallback((updatedClient: Client) => {
+    setCurrentClient(updatedClient);
+  }, []);
+
+  const handleClientLogout = useCallback(async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+    setCurrentClient(null);
+    setCurrentView('catalog');
+  }, []);
 
   const handleSwitchView = useCallback((view: ViewName) => {
     if (view === 'admin-dashboard' && currentUser?.role !== 'admin') {
@@ -94,27 +129,22 @@ function App() {
     setCurrentView(view)
   }, [currentUser])
 
-const handleAddStudent = useCallback(async (student: User) => {
-  try {
-    const authResult = await createUserWithEmailAndPassword(secondaryAuth, student.email!, student.password);
-    const studentWithAuthUid = { 
-      ...student, 
-      uid: authResult.user.uid 
-    };
-    await addUser(studentWithAuthUid);
-    await refresh();
-  } catch (err: any) {
-    console.error('Failed to create student:', err);
-    if (err.code === 'auth/email-already-in-use') {
-      alert('This email already exists in Firebase Authentication. Please check the Authentication tab in Firebase Console and delete the orphaned user, or use a different email.');
-    } else if (err.code === 'auth/invalid-email') {
-      alert('Invalid email address format.');
-    } else {
-      alert(`Error creating student: ${err.message}. Check console for details.`);
+  const handleAddStudent = useCallback(async (student: User) => {
+    try {
+      const authResult = await createUserWithEmailAndPassword(secondaryAuth, student.email!, student.password);
+      const studentWithAuthUid = { ...student, uid: authResult.user.uid };
+      await addUser(studentWithAuthUid);
+      await refresh();
+    } catch (err: any) {
+      console.error('Failed to create student:', err);
+      if (err.code === 'auth/email-already-in-use') {
+        alert('This email already exists in Firebase Authentication.');
+      } else {
+        alert(`Error creating student: ${err.message}`);
+      }
+      throw err; 
     }
-    throw err; 
-  }
-}, [addUser, refresh]);
+  }, [addUser, refresh]);
 
   const handleAddAdmin = useCallback(async (admin: User) => {
     try {
@@ -124,54 +154,33 @@ const handleAddStudent = useCallback(async (student: User) => {
       await refresh();
     } catch (err: any) {
       console.error('Failed to create admin:', err);
-      if (err.code === 'auth/email-already-in-use') {
-        alert('An admin with this email already exists.');
-      } else {
-        alert('Error creating admin. Check console for details.');
-      }
+      alert(`Error creating admin: ${err.message}`);
       throw err;
     }
   }, [addUser, refresh]);
 
   const handleBulkAddStudents = useCallback(async (studentsData: {firstName: string, lastName: string, email: string, password?: string}[]) => {
     const results = { success: 0, failed: 0, errors: [] as string[] };
-    
     for (let i = 0; i < studentsData.length; i += 5) {
       const batch = studentsData.slice(i, i + 5);
-      
       await Promise.all(batch.map(async (data) => {
         try {
           const email = data.email.trim().toLowerCase();
           const password = data.password || `Temp${Math.random().toString(36).slice(-8)}!`;
           const name = `${data.firstName} ${data.lastName}`.trim();
-          
           const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
           const uid = userCredential.user.uid;
-          
-          const newUser: User = {
-            uid,
-            role: 'student',
-            name,
-            username: email,
-            email,
-            password,
-            isTemp: true,
-            services_active: []
-          };
-          
+          const newUser: User = { uid, role: 'student', name, username: email, email, password, isTemp: true, services_active: [] };
           await addUser(newUser);
           await sendPasswordResetEmail(secondaryAuth, email);
           results.success++;
         } catch (err: any) {
-          console.error(`Failed to create ${data.email}:`, err.message);
           results.failed++;
           results.errors.push(`${data.email}: ${err.message}`);
         }
       }));
-      
       await new Promise(resolve => setTimeout(resolve, 1500)); 
     }
-    
     refresh();
     return results;
   }, [addUser, refresh]);
@@ -183,9 +192,7 @@ const handleAddStudent = useCallback(async (student: User) => {
 
   const handleUpdateUser = useCallback((user: User) => {
     updateUser(user);
-    if (currentUser?.uid === user.uid) {
-      setCurrentUser(user);
-    }
+    if (currentUser?.uid === user.uid) setCurrentUser(user);
     refresh();
   }, [updateUser, currentUser, refresh]);
 
@@ -202,6 +209,7 @@ const handleAddStudent = useCallback(async (student: User) => {
   const handleResetData = useCallback(() => {
     resetAllData();
     setCurrentUser(null);
+    setCurrentClient(null);
     setCurrentView('catalog');
     refresh();
     window.location.reload();
@@ -217,6 +225,21 @@ const handleAddStudent = useCallback(async (student: User) => {
 
   const renderView = () => {
     switch (currentView) {
+      case 'client-login':
+        return <ClientLogin onSwitchView={handleSwitchView} />;
+      
+      case 'client-dashboard':
+        return currentClient ? (
+          <ClientDashboard 
+            client={currentClient} 
+            onUpdateClient={handleClientUpdate} 
+            onLogout={handleClientLogout}
+            onSwitchView={handleSwitchView}
+          />
+        ) : (
+          <ClientLogin onSwitchView={handleSwitchView} />
+        );
+
       case 'catalog':
         return <ServicesCatalog categories={SERVICE_CATEGORIES} onBookNow={() => handleSwitchView('booking')} />
       
@@ -235,69 +258,23 @@ const handleAddStudent = useCallback(async (student: User) => {
       
       case 'admin-login':
         return currentUser?.role === 'admin' ? (
-          <AdminDashboard
-            currentUser={currentUser}
-            users={users}
-            services={services}
-            bookings={bookings}
-            onAddStudent={handleAddStudent}
-            onAddAdmin={handleAddAdmin}
-            onBulkAddStudents={handleBulkAddStudents}
-            onRemoveStudent={handleRemoveStudent}
-            onResetData={handleResetData}
-            onUpdateUser={handleUpdateUser}
-          />
-        ) : (
-          <AdminLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
-        )
+          <AdminDashboard currentUser={currentUser} users={users} services={services} bookings={bookings} onAddStudent={handleAddStudent} onAddAdmin={handleAddAdmin} onBulkAddStudents={handleBulkAddStudents} onRemoveStudent={handleRemoveStudent} onResetData={handleResetData} onUpdateUser={handleUpdateUser} />
+        ) : <AdminLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
       
       case 'admin-dashboard':
         return currentUser?.role === 'admin' ? (
-          <AdminDashboard
-            currentUser={currentUser}
-            users={users}
-            services={services}
-            bookings={bookings}
-            onAddStudent={handleAddStudent}
-            onAddAdmin={handleAddAdmin}
-            onBulkAddStudents={handleBulkAddStudents}
-            onRemoveStudent={handleRemoveStudent}
-            onResetData={handleResetData}
-            onUpdateUser={handleUpdateUser}
-          />
-        ) : (
-          <AdminLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
-        )
+          <AdminDashboard currentUser={currentUser} users={users} services={services} bookings={bookings} onAddStudent={handleAddStudent} onAddAdmin={handleAddAdmin} onBulkAddStudents={handleBulkAddStudents} onRemoveStudent={handleRemoveStudent} onResetData={handleResetData} onUpdateUser={handleUpdateUser} />
+        ) : <AdminLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
       
       case 'student-login':
         return currentUser?.role === 'student' ? (
-          <StudentDashboard
-            currentUser={currentUser}
-            services={services}
-            schedule={schedule}
-            bookings={bookings}
-            categories={SERVICE_CATEGORIES}
-            onUpdateUser={handleUpdateUser}
-            onUpdateSchedule={handleUpdateSchedule}
-          />
-        ) : (
-          <StudentLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
-        )
+          <StudentDashboard currentUser={currentUser} services={services} schedule={schedule} bookings={bookings} categories={SERVICE_CATEGORIES} onUpdateUser={handleUpdateUser} onUpdateSchedule={handleUpdateSchedule} />
+        ) : <StudentLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
       
       case 'student-dashboard':
         return currentUser?.role === 'student' ? (
-          <StudentDashboard
-            currentUser={currentUser}
-            services={services}
-            schedule={schedule}
-            bookings={bookings}
-            categories={SERVICE_CATEGORIES}
-            onUpdateUser={handleUpdateUser}
-            onUpdateSchedule={handleUpdateSchedule}
-          />
-        ) : (
-          <StudentLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
-        )
+          <StudentDashboard currentUser={currentUser} services={services} schedule={schedule} bookings={bookings} categories={SERVICE_CATEGORIES} onUpdateUser={handleUpdateUser} onUpdateSchedule={handleUpdateSchedule} />
+        ) : <StudentLogin onLogin={handleLogin} onSwitchView={handleSwitchView} />
       
       default:
         return <ServicesCatalog categories={SERVICE_CATEGORIES} />
@@ -306,11 +283,7 @@ const handleAddStudent = useCallback(async (student: User) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar
-        currentUser={currentUser}
-        onSwitchView={handleSwitchView}
-        onLogout={handleLogout}
-      />
+      <Navbar currentUser={currentUser} onSwitchView={handleSwitchView} onLogout={handleLogout} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {renderView()}
       </main>
