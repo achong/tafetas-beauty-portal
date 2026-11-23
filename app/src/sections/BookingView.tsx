@@ -1,3 +1,4 @@
+// app/src/sections/BookingView.tsx
 import { useState, useMemo } from 'react';
 import { Check, User as UserIcon, Calendar, Clock, CreditCard, AlertCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,9 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { Service, User, Booking, Form, FormResponse } from '@/types';
+import type { Service, User, Client, Booking, Form, FormResponse } from '@/types';
 import type { ScheduleEntry } from '@/types';
-
 
 const CLINIC_TIME_SLOTS = [
   '9:00', '9:30', '10:00', '10:30', '11:00', '11:30',
@@ -33,6 +33,7 @@ const CLINIC_TIME_SLOTS = [
 
 interface BookingViewProps {
   currentUser: User | null;
+  currentClient?: Client | null; // ✅ NEW: To pre-fill data and link bookings
   services: Service[];
   users: User[];
   schedule: ScheduleEntry[];
@@ -43,6 +44,7 @@ interface BookingViewProps {
 
 export function BookingView({ 
   currentUser,
+  currentClient,
   services, 
   users, 
   schedule, 
@@ -55,9 +57,12 @@ export function BookingView({
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
-  const [clientName, setClientName] = useState('');
-  const [clientEmail, setClientEmail] = useState('');
-  const [clientPhone, setClientPhone] = useState('');
+  
+  // ✅ Pre-fill with client data if logged in
+  const [clientName, setClientName] = useState(currentClient?.name || '');
+  const [clientEmail, setClientEmail] = useState(currentClient?.email || '');
+  const [clientPhone, setClientPhone] = useState(currentClient?.phone || '');
+  
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
   
@@ -70,18 +75,13 @@ export function BookingView({
     return Object.keys(categories);
   }, [categories]);
 
-    const filteredServices = useMemo(() => {
+  const filteredServices = useMemo(() => {
     if (!services) return [];
     if (selectedCategory === 'all') return services;
-    
-    // Robust filter: trims whitespace and ignores case
     return services.filter((s) => 
       s.category?.trim().toLowerCase() === selectedCategory.trim().toLowerCase()
     );
   }, [selectedCategory, services]);
-
-   console.log("ALL services from Firebase:", services);
-  console.log("Selected Category:", selectedCategory, "Filtered:", filteredServices);
 
   const selectedService = useMemo(
     () => selectedServiceId === 'all' ? null : (services?.find((s) => s.service_id === selectedServiceId) || null),
@@ -132,19 +132,14 @@ export function BookingView({
     return status;
   }, [bookedTimesForDate, availableSlots]);
 
-    // ✅ NEW: Calculate currently offered services based on open schedule slots
   const currentlyOfferedServices = useMemo(() => {
     if (!schedule || !users || !services) return [];
-
-    // 1. Find students who have at least one open slot in the schedule
     const activeStudentIds = new Set<string>();
     schedule.forEach((slot: any) => {
       if (slot.is_open === true && slot.student_id) {
         activeStudentIds.add(slot.student_id);
       }
     });
-
-    // 2. Get all unique service_ids offered by these active students
     const offeredServiceIds = new Set<string>();
     users.forEach((user) => {
       if (user.role === 'student' && activeStudentIds.has(user.uid)) {
@@ -153,8 +148,6 @@ export function BookingView({
         });
       }
     });
-
-    // 3. Map service_ids to actual service objects and sort alphabetically
     return services
       .filter((s) => offeredServiceIds.has(s.service_id))
       .sort((a, b) => a.name.localeCompare(b.name));
@@ -189,12 +182,10 @@ export function BookingView({
     setSelectedTime(t);
   };
 
-   const saveBooking = async (bookingData: Booking) => {
+  const saveBooking = async (bookingData: Booking) => {
     try {
-      // 1. Save to Firebase via App.tsx
       onBook(bookingData);
 
-      // 2. Prepare email data
       const templateParams = {
         client_name: bookingData.client_name || 'Valued Client',
         service_name: bookingData.service?.name || 'Salon Service',
@@ -204,14 +195,13 @@ export function BookingView({
         to_email: bookingData.client_email, 
       };
 
-      // 3. Send Confirmation Email using native fetch (No npm package needed!)
       await fetch('https://api.emailjs.com/api/v1.0/email/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           service_id: 'service_4qnx88c',
           template_id: 'template_bz1r1nh',
-          user_id: 'rVWHR3b4DfTP9T7om', // Your Public Key
+          user_id: 'rVWHR3b4DfTP9T7om',
           template_params: templateParams,
         }),
       });
@@ -227,19 +217,18 @@ export function BookingView({
     }
   };
 
-
   const handleFormSubmit = async (responses: FormResponse[]) => {
     if (!activeForm || !pendingBooking) return;
 
     try {
       await addDoc(collection(db, 'form_submissions'), {
         form_id: activeForm.form_id,
-        client_uid: currentUser?.uid || `guest_${Date.now()}`,
-        client_name: pendingBooking.client_name || currentUser?.name || 'Guest',
         booking_id: pendingBooking.id?.toString() || 'pending',
-        responses,
+        client_id: currentClient?.uid || null, // ✅ Link to client profile
+        student_id: pendingBooking.student_id,
+        client_responses: responses, // ✅ Saved under the new structure
         submitted_at: new Date().toISOString(),
-        is_signed: true
+        is_signed: responses.some(r => r.field_id === 'client_signature' && r.value)
       });
 
       await saveBooking(pendingBooking);
@@ -256,15 +245,17 @@ export function BookingView({
       id: Date.now(),
       service: selectedService,
       student: selectedStudentId,
-      date: selectedDate,
-      time: selectedTime,
+      student_id: selectedStudentId,
+      client_id: currentClient?.uid, // ✅ Link to client profile
       client_name: clientName.trim(),
       client_email: clientEmail.trim(),
       client_phone: clientPhone.trim(),
-      student_id: selectedStudentId,
+      date: selectedDate,
+      time: selectedTime,
+      status: 'confirmed',
     };
 
-    const requiredForm = SERVICE_FORMS.find(f => f.service_id === selectedService.service_id);
+    const requiredForm = SERVICE_FORMS.find(f => f.service_id === selectedService.service_id || f.service_id === 'all');
 
     if (requiredForm) {
       setActiveForm(requiredForm);
@@ -282,9 +273,9 @@ export function BookingView({
     setSelectedStudentId('');
     setSelectedDate('');
     setSelectedTime('');
-    setClientName('');
-    setClientEmail('');
-    setClientPhone('');
+    setClientName(currentClient?.name || '');
+    setClientEmail(currentClient?.email || '');
+    setClientPhone(currentClient?.phone || '');
     setConfirmedBooking(null);
   };
 
@@ -295,9 +286,15 @@ export function BookingView({
     { label: 'Time', done: !!selectedTime },
   ];
 
+  // ✅ Pre-fill values for the form renderer
+  const formInitialValues = useMemo(() => ({
+    client_name: clientName,
+    client_email: clientEmail,
+    client_phone: clientPhone,
+  }), [clientName, clientEmail, clientPhone]);
+
   return (
     <div className="fade-in max-w-5xl mx-auto">
-      {/* 1. HERO SECTION */}
       <div className="bg-muted/30 rounded-2xl p-6 md:p-8 mb-8 border border-border">
         <div className="flex items-start gap-4">
           <div className="p-3 bg-primary rounded-xl shadow-lg">
@@ -314,35 +311,24 @@ export function BookingView({
         </div>
       </div>
 
-
-      {/* ✅ 2. PASTE THE NEW BOX RIGHT HERE ✅ */}
-      {/* Currently Offered Services Box */}
       <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 mb-8 animate-in fade-in slide-in-from-bottom-2">
         <h3 className="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-primary" />
           The services we are currently offering are:
         </h3>
-        
         {currentlyOfferedServices.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {currentlyOfferedServices.map((service) => (
-              <span 
-                key={service.service_id} 
-                className="bg-background border border-border text-foreground px-3 py-1.5 rounded-full text-sm font-medium shadow-sm hover:border-primary transition-colors"
-              >
+              <span key={service.service_id} className="bg-background border border-border text-foreground px-3 py-1.5 rounded-full text-sm font-medium shadow-sm hover:border-primary transition-colors">
                 {service.name}
               </span>
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground text-sm italic">
-            No services are currently available. Please check back soon!
-          </p>
+          <p className="text-muted-foreground text-sm italic">No services are currently available. Please check back soon!</p>
         )}
       </div>
 
-
-      {/* 3. MAIN BOOKING CARD STARTS HERE */}
       <div className="bg-card rounded-2xl shadow-md border border-border p-6 md:p-8">
         <div className="flex items-center justify-center gap-2 md:gap-4 mb-8 overflow-x-auto pb-2">
           {steps.map((step, i) => (
@@ -567,7 +553,12 @@ export function BookingView({
           </DialogHeader>
           {activeForm && (
             <div className="py-4">
-              <FormRenderer form={activeForm} onSubmit={handleFormSubmit} onCancel={() => { setShowFormModal(false); setPendingBooking(null); setActiveForm(null); }} />
+              <FormRenderer 
+                form={activeForm} 
+                initialValues={formInitialValues} 
+                onSubmit={handleFormSubmit} 
+                onCancel={() => { setShowFormModal(false); setPendingBooking(null); setActiveForm(null); }} 
+              />
             </div>
           )}
         </DialogContent>

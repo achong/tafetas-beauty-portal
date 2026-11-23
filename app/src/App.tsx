@@ -247,6 +247,7 @@ function App() {
         return (
           <BookingView
             currentUser={currentUser}
+            currentClient={currentClient}
             services={services}
             users={users}
             schedule={schedule}
