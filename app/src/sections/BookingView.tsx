@@ -43,7 +43,7 @@ interface BookingViewProps {
 }
 
 export function BookingView({ 
-  currentUser,
+  // currentUser, // Not used in this component
   currentClient,
   services, 
   users, 
