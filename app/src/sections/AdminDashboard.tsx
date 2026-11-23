@@ -1,6 +1,8 @@
-import { useState, useMemo } from 'react';
+// app/src/sections/AdminDashboard.tsx
+import { useState, useMemo, useEffect } from 'react';
 import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import {
   Users,
   Scissors,
@@ -13,6 +15,8 @@ import {
   Upload,
   Loader2,
   FileText,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,7 +49,9 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import Papa, { ParseResult } from 'papaparse';
-import type { User, Service, Booking } from '@/types';
+import { FormRenderer } from '@/components/FormRenderer';
+import { SERVICE_FORMS } from '@/data/forms';
+import type { User, Service, Booking, Form, FormSubmission, FormResponse } from '@/types';
 
 interface AdminDashboardProps {
   currentUser: User;
@@ -93,6 +99,12 @@ export function AdminDashboard({
   const [isBulkUploading, setIsBulkUploading] = useState(false);
   const [bulkResults, setBulkResults] = useState<{success: number, failed: number, errors: string[]} | null>(null);
 
+  // ✅ NEW: Assessor Grading State
+  const [showGradingModal, setShowGradingModal] = useState(false);
+  const [gradingBooking, setGradingBooking] = useState<Booking | null>(null);
+  const [gradingForm, setGradingForm] = useState<Form | null>(null);
+  const [gradingSubmission, setGradingSubmission] = useState<FormSubmission | null>(null);
+
   const students = useMemo(() => users.filter((u) => u.role === 'student'), [users]);
   const admins = useMemo(() => users.filter((u) => u.role === 'admin'), [users]);
 
@@ -107,8 +119,7 @@ export function AdminDashboard({
     if (newPassword !== confirmPassword) { alert('Passwords do not match'); return; }
     onUpdateUser({ ...currentUser, password: newPassword, isTemp: false });
     setShowPasswordModal(false);
-    setNewPassword('');
-    setConfirmPassword('');
+    setNewPassword(''); setConfirmPassword('');
     alert('Password updated successfully');
   };
 
@@ -116,21 +127,13 @@ export function AdminDashboard({
     const f = firstName.trim();
     const l = lastName.trim();
     const email = studentEmail.trim().toLowerCase();
-    
     if (!f || !l) { alert('Please enter both First and Last Name.'); return; }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !emailRegex.test(email)) { alert('Please enter a valid email address'); return; }
 
     const password = Math.random().toString(36).slice(-8);
     const student: User = {
-      uid: `st_${Date.now()}`,
-      role: 'student',
-      name: `${f} ${l}`,
-      username: email,
-      email: email,
-      password: password,
-      isTemp: true,
-      services_active: [],
+      uid: `st_${Date.now()}`, role: 'student', name: `${f} ${l}`, username: email, email, password, isTemp: true, services_active: [],
     };
 
     try {
@@ -148,21 +151,13 @@ export function AdminDashboard({
     const name = `${firstName.trim()} ${lastName.trim()}`;
     const email = adminEmail.trim().toLowerCase();
     const password = adminPassword.trim();
-    
     if (!firstName.trim() || !lastName.trim()) { alert('Please enter both First and Last Name.'); return; }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !emailRegex.test(email)) { alert('Please enter a valid email address'); return; }
     if (!password || password.length < 6) { alert('Password must be at least 6 characters'); return; }
 
     const admin: User = {
-      uid: `admin_${Date.now()}`,
-      role: 'admin',
-      name: name,
-      username: email,
-      email: email,
-      password: password,
-      isTemp: false,
-      services_active: [],
+      uid: `admin_${Date.now()}`, role: 'admin', name, username: email, email, password, isTemp: false, services_active: [],
     };
 
     onAddAdmin(admin);
@@ -179,7 +174,7 @@ export function AdminDashboard({
       alert(`Password reset email sent to ${studentEmail}`);
     } catch (error: any) {
       console.error('Error sending reset email:', error);
-      alert('Failed to send password reset email. Check console for details.');
+      alert('Failed to send password reset email.');
     }
   };
 
@@ -189,7 +184,6 @@ export function AdminDashboard({
 
   const handleBulkUpload = async () => {
     if (!bulkFile) return alert('Please select a CSV file first.');
-    
     setIsBulkUploading(true);
     setBulkProgress({ current: 0, total: 0, status: 'Parsing CSV...' });
     setBulkResults(null);
@@ -206,7 +200,6 @@ export function AdminDashboard({
         }
 
         setBulkProgress({ current: 0, total: studentsData.length, status: 'Starting upload...' });
-
         const formattedStudents = studentsData.map((row: any) => ({
           firstName: row.firstName?.trim() || '',
           lastName: row.lastName?.trim() || '',
@@ -222,7 +215,7 @@ export function AdminDashboard({
           setBulkProgress(prev => ({ ...prev, current: formattedStudents.length, status: 'Complete!' }));
         } catch (error) {
           console.error('Bulk upload failed:', error);
-          alert('Bulk upload failed. Check console for details.');
+          alert('Bulk upload failed.');
         } finally {
           setIsBulkUploading(false);
         }
@@ -234,13 +227,49 @@ export function AdminDashboard({
     });
   };
 
+  // ✅ NEW: Assessor Grading Functions
+  const handleOpenGrading = async (booking: Booking) => {
+    setGradingBooking(booking);
+    const form = SERVICE_FORMS.find(f => f.service_id === booking.service?.service_id || f.service_id === 'all');
+    setGradingForm(form || null);
+
+    const q = query(collection(db, 'form_submissions'), where('booking_id', '==', booking.id.toString()));
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      const submissionData = querySnapshot.docs[0].data() as FormSubmission;
+      submissionData.id = querySnapshot.docs[0].id;
+      setGradingSubmission(submissionData);
+    } else {
+      setGradingSubmission(null);
+    }
+    setShowGradingModal(true);
+  };
+
+  const handleGradingSubmit = async (responses: FormResponse[]) => {
+    if (!gradingSubmission?.id) {
+      alert('No form submission found for this booking yet.');
+      return;
+    }
+    try {
+      await updateDoc(doc(db, 'form_submissions', gradingSubmission.id), {
+        assessor_responses: responses
+      });
+      alert('Assessor grading saved successfully!');
+      setShowGradingModal(false);
+    } catch (error) {
+      console.error('Error saving grading:', error);
+      alert('Error saving grading.');
+    }
+  };
+
   return (
     <div className="fade-in space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Admin Dashboard</h2>
-          <p className="text-muted-foreground text-sm mt-1">Manage students, admins and system settings</p>
+          <p className="text-muted-foreground text-sm mt-1">Manage students, admins, bookings and system settings</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => setShowPasswordModal(true)} className="border-border text-foreground hover:bg-accent hover:text-accent-foreground">
@@ -268,6 +297,57 @@ export function AdminDashboard({
           </Card>
         ))}
       </div>
+
+      {/* ✅ NEW: Assessor Grading Section */}
+      <Card className="bg-card border-border">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border bg-card">
+          <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-primary" /> Assessor Grading
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-border hover:bg-transparent">
+                  <TableHead className="text-muted-foreground font-medium">Client</TableHead>
+                  <TableHead className="text-muted-foreground font-medium">Service</TableHead>
+                  <TableHead className="text-muted-foreground font-medium">Student</TableHead>
+                  <TableHead className="text-muted-foreground font-medium">Date & Time</TableHead>
+                  <TableHead className="text-muted-foreground font-medium">Grading Status</TableHead>
+                  <TableHead className="text-right text-muted-foreground font-medium">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bookings.length > 0 ? bookings.map((b) => {
+                  // In a real app, you'd check if assessor_responses exists for this booking
+                  const isGraded = false; // Placeholder logic
+                  return (
+                    <TableRow key={b.id} className="border-border hover:bg-accent/50">
+                      <TableCell className="font-medium text-foreground">{b.client_name}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{b.service?.name}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{users.find(u => u.uid === b.student_id)?.name || 'Unknown'}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{b.date} at {b.time}</TableCell>
+                      <TableCell>
+                        <Badge variant={isGraded ? "default" : "outline"} className={isGraded ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-amber-500/10 text-amber-500 border-amber-500/20"}>
+                          {isGraded ? "Graded" : "Pending"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="outline" size="sm" onClick={() => handleOpenGrading(b)} className="border-primary/50 text-primary hover:bg-primary/10">
+                          <FileText className="w-4 h-4 mr-1.5" /> Grade
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                }) : (
+                  <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No bookings found.</TableCell></TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Admin Management */}
       <Card className="bg-card border-border">
@@ -470,16 +550,8 @@ export function AdminDashboard({
               Upload a CSV file with columns: <strong>firstName, lastName, email, password</strong> (password is optional, a secure one will be generated if omitted).
             </DialogDescription>
           </DialogHeader>
-          
           <div className="space-y-4 py-4">
-            <Input 
-              type="file" 
-              accept=".csv" 
-              onChange={(e) => setBulkFile(e.target.files?.[0] || null)} 
-              disabled={isBulkUploading}
-              className="cursor-pointer"
-            />
-            
+            <Input type="file" accept=".csv" onChange={(e) => setBulkFile(e.target.files?.[0] || null)} disabled={isBulkUploading} className="cursor-pointer" />
             {bulkProgress.total > 0 && (
               <div className="space-y-2 bg-muted/50 p-4 rounded-lg">
                 <div className="flex justify-between text-sm font-medium">
@@ -487,14 +559,10 @@ export function AdminDashboard({
                   <span>{bulkProgress.current} / {bulkProgress.total}</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-3">
-                  <div 
-                    className="bg-primary h-3 rounded-full transition-all duration-500" 
-                    style={{ width: `${(bulkProgress.current / bulkProgress.total) * 100}%` }}
-                  ></div>
+                  <div className="bg-primary h-3 rounded-full transition-all duration-500" style={{ width: `${(bulkProgress.current / bulkProgress.total) * 100}%` }}></div>
                 </div>
               </div>
             )}
-
             {bulkResults && !isBulkUploading && (
               <div className={`p-3 border rounded-lg text-sm ${bulkResults.failed === 0 ? 'bg-green-500/10 border-green-500/20 text-green-600' : 'bg-amber-500/10 border-amber-500/20 text-amber-600'}`}>
                 ✅ Successfully created {bulkResults.success} students. Password setup emails have been sent!
@@ -502,33 +570,45 @@ export function AdminDashboard({
               </div>
             )}
           </div>
-
           <div className="flex gap-3">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setShowBulkModal(false);
-                setBulkFile(null);
-                setBulkProgress({ current: 0, total: 0, status: '' });
-                setBulkResults(null);
-              }} 
-              disabled={isBulkUploading}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleBulkUpload} 
-              disabled={!bulkFile || isBulkUploading}
-              className="flex-1 bg-primary hover:bg-primary/90"
-            >
-              {isBulkUploading ? (
-                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
-              ) : (
-                'Start Upload'
-              )}
+            <Button variant="outline" onClick={() => { setShowBulkModal(false); setBulkFile(null); setBulkProgress({ current: 0, total: 0, status: '' }); setBulkResults(null); }} disabled={isBulkUploading} className="flex-1">Cancel</Button>
+            <Button onClick={handleBulkUpload} disabled={!bulkFile || isBulkUploading} className="flex-1 bg-primary hover:bg-primary/90">
+              {isBulkUploading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</> : 'Start Upload'}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ✅ NEW: Assessor Grading Modal */}
+      <Dialog open={showGradingModal} onOpenChange={setShowGradingModal}>
+        <DialogContent className="sm:max-w-3xl bg-card border-border text-foreground max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              Assessor Grading: {gradingBooking?.client_name} - {gradingBooking?.service?.name}
+            </DialogTitle>
+            <DialogDescription>
+              {gradingBooking?.date} at {gradingBooking?.time} | Student: {users.find(u => u.uid === gradingBooking?.student_id)?.name}
+            </DialogDescription>
+          </DialogHeader>
+          {gradingForm && gradingSubmission ? (
+            <div className="py-4">
+              <FormRenderer 
+                form={gradingForm} 
+                formSection="assessor"
+                initialValues={
+                  (gradingSubmission.assessor_responses || []).reduce((acc: any, curr: any) => ({...acc, [curr.field_id]: curr.value}), {})
+                }
+                onSubmit={handleGradingSubmit} 
+                onCancel={() => setShowGradingModal(false)} 
+              />
+            </div>
+          ) : (
+            <div className="py-8 text-center text-muted-foreground">
+              <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-amber-500" />
+              <p>No form submission found for this booking yet. The student must complete their sections first.</p>
+              <Button variant="outline" className="mt-4" onClick={() => setShowGradingModal(false)}>Close</Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
