@@ -553,12 +553,13 @@ export function BookingView({
           </DialogHeader>
           {activeForm && (
             <div className="py-4">
-              <FormRenderer 
-                form={activeForm} 
-                initialValues={formInitialValues} 
-                onSubmit={handleFormSubmit} 
-                onCancel={() => { setShowFormModal(false); setPendingBooking(null); setActiveForm(null); }} 
-              />
+<FormRenderer 
+  form={activeForm} 
+  formSection="client_session"
+  initialValues={formInitialValues} 
+  onSubmit={handleFormSubmit} 
+  onCancel={() => { setShowFormModal(false); setPendingBooking(null); setActiveForm(null); }} 
+/>
             </div>
           )}
         </DialogContent>
