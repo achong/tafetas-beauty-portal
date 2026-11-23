@@ -1,5 +1,5 @@
 // app/src/sections/AdminDashboard.tsx
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
@@ -16,7 +16,6 @@ import {
   Loader2,
   FileText,
   CheckCircle,
-  XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
